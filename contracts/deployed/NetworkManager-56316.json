@@ -1,0 +1,363 @@
+{
+  "contractName": "NetworkManager",
+  "address": "0x23B48De8f3945E8EffD17764B0537Ffc8C835F74",
+  "network": "xdc-subnet-56316",
+  "deployedAt": "2025-11-04T04:17:37.419Z",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor",
+      "signature": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "oldManager",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newManager",
+          "type": "address"
+        }
+      ],
+      "name": "ManagerChanged",
+      "type": "event",
+      "signature": "0x605c2dbf762e5f7d60a546d42e7205dcb1b011ebc62a61736a57c9089d3a4350"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "x500Name",
+          "type": "string"
+        }
+      ],
+      "name": "MemberAdded",
+      "type": "event",
+      "signature": "0x5660dfedd5f2d238aa153a2c488e927eb29ea0e780d70089f0e90c7409a2079c"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
+        }
+      ],
+      "name": "MemberRemoved",
+      "type": "event",
+      "signature": "0x6e76fb4c77256006d9c38ec7d82b45a8c8f3c27b1d6766fffc42dfb8de684492"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
+        }
+      ],
+      "name": "MemberUpdated",
+      "type": "event",
+      "signature": "0xc849ff69d29483b688b050076f9d03b1a618c93ea052a712bfd3224eb71da8e2"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "memberAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "x500Name",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes",
+          "name": "publicKey",
+          "type": "bytes"
+        }
+      ],
+      "name": "addMember",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function",
+      "signature": "0x1f6949d5"
+    },
+    {
+      "inputs": [],
+      "name": "getAllMembers",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true,
+      "signature": "0x7c0f6b35"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "memberAddress",
+          "type": "address"
+        }
+      ],
+      "name": "getMember",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "x500Name",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "nodeAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes",
+              "name": "publicKey",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bool",
+              "name": "isActive",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint256",
+              "name": "joinedAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "lastUpdated",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct NetworkManager.NodeMember",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true,
+      "signature": "0x2ada2596"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "memberAddress",
+          "type": "address"
+        }
+      ],
+      "name": "isMember",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true,
+      "signature": "0xa230c524"
+    },
+    {
+      "inputs": [],
+      "name": "manager",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true,
+      "signature": "0x481c6a75"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "memberAddresses",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true,
+      "signature": "0xcc4e6299"
+    },
+    {
+      "inputs": [],
+      "name": "memberCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true,
+      "signature": "0x11aee380"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "members",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "x500Name",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "nodeAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "publicKey",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bool",
+          "name": "isActive",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "joinedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "lastUpdated",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true,
+      "signature": "0x08ae4b0c"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "memberAddress",
+          "type": "address"
+        }
+      ],
+      "name": "removeMember",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function",
+      "signature": "0x0b1ca49a"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newManager",
+          "type": "address"
+        }
+      ],
+      "name": "transferManagerRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function",
+      "signature": "0x39801a91"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "memberAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "x500Name",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes",
+          "name": "publicKey",
+          "type": "bytes"
+        }
+      ],
+      "name": "updateMemberDetails",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function",
+      "signature": "0x1052430f"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "memberAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "isActive",
+          "type": "bool"
+        }
+      ],
+      "name": "updateMemberStatus",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function",
+      "signature": "0x457873c0"
+    }
+  ]
+}
