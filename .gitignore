@@ -1,0 +1,62 @@
+# XDC Subnet-Deployment .gitignore
+
+# Environment files
+*.env
+.env.*
+!.env.example
+*_deploy.env
+contract_deploy.env
+
+# Log files
+*/*.log
+*.log
+nodes/LOG
+logs/
+generated/stats-service/logs/
+
+# Data files
+*.rlp
+MANIFEST-00*
+LOCK
+
+
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Blockchain specific
+generated/xdcchain*/XDC/chaindata/
+generated/xdcchain*/XDC/lightchaindata/
+generated/xdcchain*/XDC/nodes/
+generated/xdcchain*/XDC.ipc
+generated/xdcchain*/XDCx/
+
+# Key files (for security)
+**/keystore/
+**/*key
+**/*keys.json
+**/nodekey
+
+# Generated files
+generated/*.json
+!generated/subswap-frontend.config.json.example
+
+# Sensitive configuration files
+**/config.json
+**/credentials.json
+**/secrets.json
+**/*.secret.*
+**/*.key.*
+**/*.pem
+**/*.p12
+**/*secrets*
+
+# IDE and OS specific files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

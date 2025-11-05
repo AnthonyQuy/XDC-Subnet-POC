@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  contract-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: xdc-contract-dev
+    volumes:
+      - ./source:/app/source
+      - ./compiled:/app/compiled
+      - ./deployed:/app/deployed
+      - ./scripts:/app/scripts
+      - ./.env:/app/.env
+    env_file:
+      - ./.env
+    environment:
+      - SUBNET_URL=http://192.168.25.11:8545
+      - SUBNET_PK=0x55dacfb3561910fbe1cad5abbaa75d3fe7a5674ae3d6bab3f32a53a5eca4adc1
+    networks:
+      - xdc_subnet_network
+    entrypoint: ["bash", "-c", "tail -f /dev/null"]
+
+networks:
+  xdc_subnet_network:
+    external: true
+    name: docker_net

@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: networkmanager-frontend-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_PORT=3000
+      - REACT_APP_DEFAULT_RPC_URL=${REACT_APP_DEFAULT_RPC_URL:-http://192.168.25.11:8545}
+      - REACT_APP_DEFAULT_CONTRACT_ADDRESS=${REACT_APP_DEFAULT_CONTRACT_ADDRESS:-""}
+    volumes:
+      # Mount the src directory for hot reloading
+      - ./src:/app/src
+      # Mount the public directory
+      - ./public:/app/public
+      # Use a named volume for node_modules to avoid overwriting with host's node_modules
+      - frontend-node-modules:/app/node_modules
+    networks:
+      - docker_net
+    stdin_open: true # To support React's interactive mode
+    tty: true # To keep the container running
+    restart: unless-stopped
+
+networks:
+  docker_net:
+    external: true
+
+volumes:
+  frontend-node-modules:

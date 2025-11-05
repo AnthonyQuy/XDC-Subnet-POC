@@ -1,0 +1,22 @@
+{
+  "name": "xdc-subnet-contracts",
+  "version": "1.0.0",
+  "description": "Smart contract development for XDC Subnet",
+  "main": "index.js",
+  "scripts": {
+    "compile": "node scripts/compile.js",
+    "deploy": "node scripts/deploy.js",
+    "interact": "node scripts/interact.js",
+    "test": "mocha --timeout 10000 tests"
+  },
+  "dependencies": {
+    "web3": "^1.9.0",
+    "dotenv": "^16.0.3",
+    "solc": "^0.8.19",
+    "fs-extra": "^11.1.1"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "chai": "^4.3.7"
+  }
+}
