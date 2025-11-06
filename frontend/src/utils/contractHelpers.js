@@ -288,6 +288,39 @@ const NetworkManagerABI = [
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "memberAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "serial",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint16",
+        "name": "platformVersion",
+        "type": "uint16"
+      },
+      {
+        "internalType": "string",
+        "name": "host",
+        "type": "string"
+      },
+      {
+        "internalType": "uint16",
+        "name": "port",
+        "type": "uint16"
+      }
+    ],
+    "name": "updateSubnetMemberDetail",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ];
 
@@ -316,14 +349,14 @@ class ContractService {
         } catch (error) {
           return false;
         }
-      } 
+      }
       // Otherwise, use the provided RPC URL
       else {
         this.web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
       }
 
       // Get the network ID
-      
+
       // Get the current account
       const accounts = await this.web3.eth.getAccounts();
       if (accounts.length > 0) {
@@ -332,7 +365,7 @@ class ContractService {
       } else {
         return false;
       }
-      
+
       return true;
     } catch (error) {
       return false;
@@ -414,7 +447,7 @@ class ContractService {
         throw new Error('Contract is not initialized');
       }
       const member = await this.contract.methods.getMember(address).call();
-      
+
       // Format the member data
       return {
         x500Name: member[0],
@@ -422,7 +455,11 @@ class ContractService {
         publicKey: this.web3.utils.hexToAscii(member[2]),
         isActive: member[3],
         joinedAt: new Date(member[4] * 1000).toLocaleString(),
-        lastUpdated: new Date(member[5] * 1000).toLocaleString()
+        lastUpdated: new Date(member[5] * 1000).toLocaleString(),
+        serial: member[6] || '',
+        platformVersion: member[7] || '',
+        host: member[8] || '',
+        port: member[9] || ''
       };
     } catch (error) {
       throw error;
@@ -457,13 +494,13 @@ class ContractService {
       if (!this.contract || !this.account) {
         throw new Error('Contract or account is not initialized');
       }
-      
+
       const encodedPublicKey = this.web3.utils.asciiToHex(publicKey);
-      
+
       const tx = await this.contract.methods
         .addMember(address, x500Name, encodedPublicKey)
         .send({ from: this.account });
-      
+
       return tx;
     } catch (error) {
       throw error;
@@ -480,11 +517,11 @@ class ContractService {
       if (!this.contract || !this.account) {
         throw new Error('Contract or account is not initialized');
       }
-      
+
       const tx = await this.contract.methods
         .removeMember(address)
         .send({ from: this.account });
-      
+
       return tx;
     } catch (error) {
       throw error;
@@ -502,11 +539,11 @@ class ContractService {
       if (!this.contract || !this.account) {
         throw new Error('Contract or account is not initialized');
       }
-      
+
       const tx = await this.contract.methods
         .updateMemberStatus(address, isActive)
         .send({ from: this.account });
-      
+
       return tx;
     } catch (error) {
       throw error;
@@ -525,18 +562,34 @@ class ContractService {
       if (!this.contract || !this.account) {
         throw new Error('Contract or account is not initialized');
       }
-      
+
       const encodedPublicKey = this.web3.utils.asciiToHex(publicKey);
-      
+
       const tx = await this.contract.methods
         .updateMemberDetails(address, x500Name, encodedPublicKey)
         .send({ from: this.account });
-      
+
       return tx;
     } catch (error) {
       throw error;
     }
   }
+
+async updateSubnetMemberDetail(address, serial, platformVersion, host, port) {
+  try {
+    if (!this.contract || !this.account) {
+      throw new Error('Contract or account is not initialized');
+    }
+    
+    const tx = await this.contract.methods
+      .updateSubnetMemberDetail(address, serial, platformVersion, host, port)
+      .send({ from: this.account });
+    
+    return tx;
+  } catch (error) {
+    throw error;
+  }
+}
 
   /**
    * Transfer manager role
@@ -548,11 +601,11 @@ class ContractService {
       if (!this.contract || !this.account) {
         throw new Error('Contract or account is not initialized');
       }
-      
+
       const tx = await this.contract.methods
         .transferManagerRole(newManager)
         .send({ from: this.account });
-      
+
       return tx;
     } catch (error) {
       throw error;
