@@ -8,7 +8,11 @@ const UpdateMemberForm = ({ onUpdateMember, members, loading }) => {
   const [formData, setFormData] = useState({
     address: '',
     x500Name: '',
-    publicKey: ''
+    publicKey: '',
+    serial: '',
+    platformVersion: '',
+    host: '',
+    port: ''
   });
   const [validated, setValidated] = useState(false);
   const [fetchingDetails, setFetchingDetails] = useState(false);
@@ -24,7 +28,7 @@ const UpdateMemberForm = ({ onUpdateMember, members, loading }) => {
         setFormData({
           address: memberDetails.nodeAddress,
           x500Name: memberDetails.x500Name,
-          publicKey: memberDetails.publicKey
+          publicKey: memberDetails.publicKey,
         });
         setFetchingDetails(false);
       } catch (error) {
