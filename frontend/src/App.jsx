@@ -7,6 +7,7 @@ import MemberList from './components/MemberList';
 import MemberDetails from './components/MemberDetails';
 import AddMemberForm from './components/AddMemberForm';
 import UpdateMemberForm from './components/UpdateMemberForm';
+import UpdateSubnetDetailsForm from './components/UpdateSubnetDetailsForm';
 import ManageContract from './components/ManageContract';
 import contractService from './utils/contractHelpers';
 
@@ -41,23 +42,23 @@ function App() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Initialize Web3
       const connected = await contractService.initWeb3(rpcUrl);
       if (!connected) {
         throw new Error('Failed to connect to XDC network');
       }
-      
+
       // Initialize contract
       const initialized = contractService.initContract(contractAddr);
       if (!initialized) {
         throw new Error('Failed to initialize contract');
       }
-      
+
       setIsConnected(true);
       setAccount(contractService.getCurrentAccount());
       setContractAddress(contractAddr);
-      
+
       await fetchContractData();
       toast.success('Successfully connected to XDC network and contract');
     } catch (err) {
@@ -72,20 +73,20 @@ function App() {
   const fetchContractData = async () => {
     try {
       setLoading(true);
-      
+
       // Get manager
       const managerAddress = await contractService.getManager();
       setManager(managerAddress);
-      
+
       // Check if current account is the manager
       setIsManager(
         managerAddress.toLowerCase() === contractService.getCurrentAccount().toLowerCase()
       );
-      
+
       // Get all members
       const memberAddresses = await contractService.getAllMembers();
       setMembers(memberAddresses);
-      
+
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -98,7 +99,7 @@ function App() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const memberDetails = await contractService.getMember(address);
       setSelectedMember(memberDetails);
     } catch (err) {
@@ -114,15 +115,15 @@ function App() {
     try {
       setLoading(true);
       setError(null);
-      
+
       await contractService.addMember(
         memberData.address,
         memberData.x500Name,
         memberData.publicKey
       );
-      
+
       toast.success('Member added successfully!');
-      
+
       // Refresh the member list
       await fetchContractData();
     } catch (err) {
@@ -138,11 +139,11 @@ function App() {
     try {
       setLoading(true);
       setError(null);
-      
+
       await contractService.removeMember(address);
-      
+
       toast.success('Member removed successfully!');
-      
+
       // Refresh the member list and clear selected member
       await fetchContractData();
       setSelectedMember(null);
@@ -159,17 +160,17 @@ function App() {
     try {
       setLoading(true);
       setError(null);
-      
+
       await contractService.updateMemberStatus(address, isActive);
-      
+
       toast.success(`Member status updated to ${isActive ? 'active' : 'inactive'}`);
-      
+
       // Refresh member details if this is the currently selected member
       if (selectedMember && selectedMember.nodeAddress === address) {
         const updatedMember = await contractService.getMember(address);
         setSelectedMember(updatedMember);
       }
-      
+
       // Refresh the member list
       await fetchContractData();
     } catch (err) {
@@ -185,15 +186,15 @@ function App() {
     try {
       setLoading(true);
       setError(null);
-      
+
       await contractService.updateMemberDetails(
         memberData.address,
         memberData.x500Name,
         memberData.publicKey
       );
-      
+
       toast.success('Member details updated successfully!');
-      
+
       // Refresh member details if this is the currently selected member
       if (selectedMember && selectedMember.nodeAddress === memberData.address) {
         const updatedMember = await contractService.getMember(memberData.address);
@@ -212,11 +213,11 @@ function App() {
     try {
       setLoading(true);
       setError(null);
-      
+
       await contractService.transferManagerRole(newManagerAddress);
-      
+
       toast.success('Manager role transferred successfully!');
-      
+
       // Refresh contract data
       await fetchContractData();
     } catch (err) {
@@ -227,22 +228,43 @@ function App() {
     }
   };
 
+  const handleUpdateSubnet = async (subnetData) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      await contractService.updateSubnetDetails(
+        subnetData.serial,
+        subnetData.platformVersion,
+        subnetData.host,
+        subnetData.port
+      );
+
+      toast.success('Subnet details updated successfully!');
+    } catch (err) {
+      setError(`Error updating subnet details: ${err.message}`);
+      toast.error(`Error updating subnet details: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="app">
-      <Navigation 
-        account={account} 
-        isConnected={isConnected} 
+      <Navigation
+        account={account}
+        isConnected={isConnected}
         isManager={isManager}
         contractAddress={contractAddress}
       />
-      
+
       <Container className="mt-4">
         {!isConnected ? (
           <ConnectionPanel onConnect={handleConnect} loading={loading} />
         ) : (
           <>
             {error && <Alert variant="danger">{error}</Alert>}
-            
+
             <Row className="mb-3">
               <Col>
                 <h3>XDC Network Manager</h3>
@@ -254,20 +276,20 @@ function App() {
                 <p>Connected Account: <strong>{account}</strong></p>
               </Col>
             </Row>
-            
+
             <Tabs defaultActiveKey="members" className="mb-3">
               <Tab eventKey="members" title="Members">
                 <Row>
                   <Col md={6}>
-                    <MemberList 
-                      members={members} 
+                    <MemberList
+                      members={members}
                       onSelectMember={handleSelectMember}
                       loading={loading}
                     />
                   </Col>
                   <Col md={6}>
                     {selectedMember ? (
-                      <MemberDetails 
+                      <MemberDetails
                         member={selectedMember}
                         isManager={isManager}
                         onRemoveMember={handleRemoveMember}
@@ -281,35 +303,47 @@ function App() {
                   </Col>
                 </Row>
               </Tab>
-              
               {isManager && (
-                <>
-                  <Tab eventKey="addMember" title="Add Member">
-                    <AddMemberForm onAddMember={handleAddMember} loading={loading} />
-                  </Tab>
-                  
-                  <Tab eventKey="updateMember" title="Update Member">
-                    <UpdateMemberForm 
-                      onUpdateMember={handleUpdateMember} 
-                      members={members}
-                      loading={loading}
-                    />
-                  </Tab>
-                  
-                  <Tab eventKey="management" title="Contract Management">
-                    <ManageContract 
-                      currentManager={manager}
-                      onTransferManager={handleTransferManager}
-                      loading={loading}
-                    />
-                  </Tab>
-                </>
+                <Tab eventKey="addMember" title="Add Member">
+                  <AddMemberForm onAddMember={handleAddMember} loading={loading} />
+                </Tab>
+              )}
+
+              {isManager && (
+                <Tab eventKey="updateMember" title="Update Member">
+                  <UpdateMemberForm
+                    onUpdateMember={handleUpdateMember}
+                    members={members}
+                    loading={loading}
+                  />
+                </Tab>
+              )}
+
+              {isManager && (
+                <Tab eventKey="management" title="Contract Management">
+                  <ManageContract
+                    currentManager={manager}
+                    onTransferManager={handleTransferManager}
+                    loading={loading}
+                  />
+                </Tab>
+              )}
+
+              {/* If you have an UpdateSubnetDetailsForm component, add it like this: */}
+              {isManager && (
+                <Tab eventKey="updateSubnet" title="Update Subnet Details">
+                  <UpdateSubnetDetailsForm
+                    members={members}
+                    loading={loading}
+                    onUpdate={handleUpdateSubnet}
+                  />
+                </Tab>
               )}
             </Tabs>
           </>
         )}
       </Container>
-      
+
       <footer className="footer mt-auto py-3 bg-light">
         <Container>
           <span className="text-muted">XDC Network Manager - © 2025</span>
