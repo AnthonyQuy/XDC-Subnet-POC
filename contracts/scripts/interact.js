@@ -227,6 +227,7 @@ async function main() {
         console.log('  updateDetails [address] [x500Name] [publicKey] - Update member name and public key');
         console.log('  transferManager [newManagerAddress]   - Transfer manager role to new address');
         console.log('  isMember [address]                    - Check if an address is a member');
+        console.log('  updateSubnetMemberDetail [address] [serial] [platformVersion] [host] [port] - Update subnet details');
         console.log('  help                                  - Display this help message');
         break;
     }
