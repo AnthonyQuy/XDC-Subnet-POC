@@ -8,7 +8,6 @@ This directory contains all the smart contract related files for the XDC Subnet 
 - `/compiled`: Store compiled contract artifacts (ABIs, bytecode)
 - `/deployed`: Track information about deployed contracts (addresses, networks)
 - `/scripts`: Deployment and interaction scripts
-- `/tests`: Contract test files
 
 ## Usage Guidelines
 

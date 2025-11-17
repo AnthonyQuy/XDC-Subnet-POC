@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  contract-dev:
+  contract:
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,12 +11,13 @@ services:
       - ./compiled:/app/compiled
       - ./deployed:/app/deployed
       - ./scripts:/app/scripts
-      - ./.env:/app/.env
+      - ./hardhat.config.js:/app/hardhat.config.js
     env_file:
       - ./.env
     environment:
       - SUBNET_URL=http://192.168.25.11:8545
       - SUBNET_PK=0x55dacfb3561910fbe1cad5abbaa75d3fe7a5674ae3d6bab3f32a53a5eca4adc1
+      - NETWORK_ID=56316
     networks:
       - xdc_subnet_network
     entrypoint: ["bash", "-c", "tail -f /dev/null"]

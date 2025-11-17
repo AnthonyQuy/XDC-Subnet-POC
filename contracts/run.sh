@@ -7,7 +7,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m' 
 
 # Print header
 echo -e "${GREEN}XDC Network Management Contract - Setup & Deployment${NC}"
@@ -54,7 +54,7 @@ start_container() {
   fi
   
   echo -e "${YELLOW}Starting container...${NC}"
-  docker-compose up -d
+  docker-compose -p xdc up -d
   
   # Wait for container to start
   echo -e "${YELLOW}Waiting for container to start...${NC}"
@@ -81,8 +81,8 @@ deploy_contract() {
   
   read -p "Continue with deployment? (y/n): " confirm
   if [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]]; then
-    echo -e "${YELLOW}Deploying contract...${NC}"
-    docker exec -it xdc-contract-dev npm run deploy
+    echo -e "${YELLOW}Deploying contract with Hardhat...${NC}"
+    docker exec -it xdc-contract-dev npx hardhat run scripts/deploy.js --network subnet
     
     if [ $? -eq 0 ]; then
       echo -e "${GREEN}Deployment completed! Contract information saved to ./deployed directory${NC}"
@@ -101,7 +101,7 @@ start_container
 # Interact with contract
 interact_with_contract() {
   echo -e "${BLUE}=== Contract Interaction Menu ===${NC}"
-  echo -e "${YELLOW}Select a command to interact with the NetworkManager contract:${NC}"
+  echo -e "${YELLOW}Select a command to interact with the NetworkManager contract using Hardhat:${NC}"
   echo "1. Get current manager"
   echo "2. Add new member"
   echo "3. Remove member"
@@ -118,43 +118,51 @@ interact_with_contract() {
   
   case $interact_option in
     1)
-      docker exec -it xdc-contract-dev node scripts/interact.js getManager
+      docker exec -e COMMAND=getManager -it xdc-contract-dev npx hardhat run scripts/hardhat-interact.js --network subnet
       ;;
     2)
       read -p "Enter member address: " address
       read -p "Enter X500 name: " x500Name
       read -p "Enter public key: " publicKey
-      docker exec -it xdc-contract-dev node scripts/interact.js addMember "$address" "$x500Name" "$publicKey"
+      read -p "Enter serial: " serial
+      read -p "Enter platformVersion: " platformVersion
+      read -p "Enter host: " host
+      read -p "Enter port: " port
+      docker exec -e COMMAND=addMember -e ARGS="$address|$x500Name|$publicKey|$serial|$platformVersion|$host|$port" -it xdc-contract-dev npx hardhat run scripts/hardhat-interact.js --network subnet
       ;;
     3)
       read -p "Enter member address to remove: " address
-      docker exec -it xdc-contract-dev node scripts/interact.js removeMember "$address"
+      docker exec -e COMMAND=removeMember -e ARGS="$address" -it xdc-contract-dev npx hardhat run scripts/hardhat-interact.js --network subnet
       ;;
     4)
       read -p "Enter member address: " address
-      docker exec -it xdc-contract-dev node scripts/interact.js getMember "$address"
+      docker exec -e COMMAND=getMember -e ARGS="$address" -it xdc-contract-dev npx hardhat run scripts/hardhat-interact.js --network subnet
       ;;
     5)
-      docker exec -it xdc-contract-dev node scripts/interact.js getAllMembers
+      docker exec -e COMMAND=getAllMembers -it xdc-contract-dev npx hardhat run scripts/hardhat-interact.js --network subnet
       ;;
     6)
       read -p "Enter member address: " address
       read -p "Set active (true/false): " active
-      docker exec -it xdc-contract-dev node scripts/interact.js updateStatus "$address" "$active"
+      docker exec -e COMMAND=updateStatus -e ARGS="$address|$active" -it xdc-contract-dev npx hardhat run scripts/hardhat-interact.js --network subnet
       ;;
     7)
       read -p "Enter member address: " address
       read -p "Enter new X500 name: " x500Name
       read -p "Enter new public key: " publicKey
-      docker exec -it xdc-contract-dev node scripts/interact.js updateDetails "$address" "$x500Name" "$publicKey"
+      read -p "Enter serial: " serial
+      read -p "Enter platformVersion: " platformVersion
+      read -p "Enter host: " host
+      read -p "Enter port: " port
+      docker exec -e COMMAND=updateDetails -e ARGS="$address|$x500Name|$publicKey|$serial|$platformVersion|$host|$port" -it xdc-contract-dev npx hardhat run scripts/hardhat-interact.js --network subnet
       ;;
     8)
       read -p "Enter new manager address: " address
-      docker exec -it xdc-contract-dev node scripts/interact.js transferManager "$address"
+      docker exec -e COMMAND=transferManager -e ARGS="$address" -it xdc-contract-dev npx hardhat run scripts/hardhat-interact.js --network subnet
       ;;
     9)
       read -p "Enter address to check: " address
-      docker exec -it xdc-contract-dev node scripts/interact.js isMember "$address"
+      docker exec -e COMMAND=isMember -e ARGS="$address" -it xdc-contract-dev npx hardhat run scripts/hardhat-interact.js --network subnet
       ;;
     10)
       read -p "Enter member address: " address
@@ -162,7 +170,7 @@ interact_with_contract() {
       read -p "Enter platform version: " platformVersion
       read -p "Enter host address: " host
       read -p "Enter port number: " port
-      docker exec -it xdc-contract-dev node scripts/interact.js updateSubnetMemberDetail "$address" "$serial" "$platformVersion" "$host" "$port"
+      docker exec -e COMMAND=updateSubnetMemberDetail -e ARGS="$address|$serial|$platformVersion|$host|$port" -it xdc-contract-dev npx hardhat run scripts/hardhat-interact.js --network subnet
       ;;
     0)
       return
@@ -173,10 +181,8 @@ interact_with_contract() {
   esac
   echo ""
   # Ask if the user wants to perform another interaction
-  read -p "Perform another interaction? (y/n): " another
-  if [[ $another == [yY] || $another == [yY][eE][sS] ]]; then
-    interact_with_contract
-  fi
+  read -p "Any key to continue... " key
+  interact_with_contract
 }
 
 # Menu options
@@ -195,8 +201,8 @@ while true; do
   
   case $option in
     1)
-      echo -e "${YELLOW}Compiling contract...${NC}"
-      docker exec -it xdc-contract-dev npm run compile
+      echo -e "${YELLOW}Compiling contract with Hardhat...${NC}"
+      docker exec -it xdc-contract-dev npx hardhat compile
       echo ""
       ;;
     2)
@@ -206,8 +212,8 @@ while true; do
       interact_with_contract
       ;;
     4)
-      echo -e "${YELLOW}Starting interactive shell...${NC}"
-      echo -e "${YELLOW}Tip: Inside the container, use 'npm run deploy' to deploy the contract${NC}"
+    echo -e "${YELLOW}Starting interactive shell...${NC}"
+    echo -e "${YELLOW}Tip: Inside the container, use 'npx hardhat run scripts/deploy.js --network subnet' to deploy the contract${NC}"
       docker exec -it xdc-contract-dev /bin/bash
       echo ""
       ;;
