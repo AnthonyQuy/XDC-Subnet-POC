@@ -4,19 +4,28 @@
   "description": "Smart contract development for XDC Subnet",
   "main": "index.js",
   "scripts": {
-    "compile": "node scripts/compile.js",
-    "deploy": "node scripts/deploy.js",
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js --network subnet",
     "interact": "node scripts/interact.js",
-    "test": "mocha --timeout 10000 tests"
+    "test": "hardhat test",
+    "node": "hardhat node"
   },
   "dependencies": {
-    "web3": "^1.9.0",
     "dotenv": "^16.0.3",
-    "solc": "^0.8.19",
     "fs-extra": "^11.1.1"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@openzeppelin/contracts": "^4.9.3",
+    "chai": "^4.3.7",
+    "ethers": "^6.8.1",
+    "hardhat": "^2.19.0",
+    "hardhat-gas-reporter": "^1.0.8",
     "mocha": "^10.2.0",
-    "chai": "^4.3.7"
+    "solidity-coverage": "^0.8.0"
   }
 }

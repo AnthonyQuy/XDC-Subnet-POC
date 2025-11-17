@@ -1,153 +1,82 @@
-const path = require('path');
-const fs = require('fs-extra');
-const Web3 = require('web3');
-require('dotenv').config();
+// Hardhat deployment script for NetworkManager contract
+const { ethers } = require("hardhat");
 
-// Helper function to get appropriate gas price
-const getGasPrice = async (web3) => {
+async function main() {
+  console.log("Starting deployment of NetworkManager contract...");
+
   try {
-    const suggestedGasPrice = await web3.eth.getGasPrice();
-    
-    // Ensure minimum value and add safety margin
-    const minGasPrice = web3.utils.toWei('10', 'gwei'); // 10 Gwei minimum
-    const finalGasPrice = BigInt(suggestedGasPrice) > BigInt(minGasPrice) 
-      ? suggestedGasPrice 
-      : minGasPrice;
-      
-    console.log(`Using gas price: ${web3.utils.fromWei(finalGasPrice, 'gwei')} Gwei`);
-    return finalGasPrice;
-  } catch (error) {
-    // Second try: Use environment variable
-    if (process.env.GAS_PRICE) {
-      console.log(`Using GAS_PRICE from environment: ${process.env.GAS_PRICE} wei`);
-      return process.env.GAS_PRICE;
-    }
-    
-    // Fallback: Use 10 Gwei as safe default
-    return web3.utils.toWei('10', 'gwei');
-  }
-};
+    // Get the contract factory
+    const NetworkManager = await ethers.getContractFactory("NetworkManager");
+    console.log("Deploying contract...");
 
-// Helper function to deploy with retry mechanism for gas price issues
-const deployWithRetry = async (deployTx, account, gas, web3) => {
-  // Gas price options to try (in Gwei)
-  const gasPriceOptions = [10, 25, 50, 100];
-  
-  for (const gwei of gasPriceOptions) {
-    const gasPrice = web3.utils.toWei(gwei.toString(), 'gwei');
-    console.log(`Attempting deployment with ${gwei} Gwei gas price...`);
-    
-    try {
-      return await deployTx.send({
-        from: account.address,
-        gas: Math.floor(gas * 1.2), // Add 20% buffer for gas estimation
-        gasPrice: gasPrice
-      })
-      .on('transactionHash', (hash) => {
-        console.log(`Transaction hash: ${hash}`);
-      })
-      .on('receipt', (receipt) => {
-        console.log(`Contract deployed at address: ${receipt.contractAddress}`);
-      });
-    } catch (error) {
-      if (error.message.includes('min gas price') || error.message.includes('under min')) {
-        continue;
-      }
-      throw error; // Re-throw if it's not a gas price error
-    }
-  }
-  
-  throw new Error(`Deployment failed: All gas price options (${gasPriceOptions.join(', ')} Gwei) were rejected as too low`);
-};
-
-// Deployment script for NetworkManager contract
-async function deployContract() {
-  try {
-    console.log('Starting deployment of NetworkManager contract...');
-    
-    // Connect to XDC subnet
-    const subnetUrl = process.env.SUBNET_URL || 'http://192.168.25.11:8545';
-    const web3 = new Web3(subnetUrl);
-    
-    // Load compiled contract
-    const compiledPath = path.resolve(__dirname, '../compiled/NetworkManager.json');
-    if (!fs.existsSync(compiledPath)) {
-      console.error('Compiled contract not found! Run "npm run compile" first.');
-      process.exit(1);
-    }
-    
-    const compiled = JSON.parse(fs.readFileSync(compiledPath, 'utf8'));
-    
-    // Get private key for deployment
-    const privateKey = process.env.SUBNET_PK;
-    if (!privateKey) {
-      console.error('Private key not found! Set SUBNET_PK environment variable.');
-      process.exit(1);
-    }
-    
-    // Create account from private key
-    const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-    web3.eth.accounts.wallet.add(account);
-    web3.eth.defaultAccount = account.address;
-    
-    console.log(`Deploying from address: ${account.address}`);
-    
-    // Get network ID
-    const networkId = await web3.eth.net.getId();
-    
-    // Create contract instance
-    const contract = new web3.eth.Contract(compiled.abi);
-    
     // Deploy contract
-    console.log('Deploying contract...');
-    const deployTx = contract.deploy({
-      data: '0x' + compiled.bytecode,
-      arguments: []
-    });
-    
-    // Estimate gas
-    const gas = await deployTx.estimateGas({
-      from: account.address
-    });
-    
-    // Use the retry mechanism for deployment
-    const deployedContract = await deployWithRetry(deployTx, account, gas, web3)
-      .catch(error => {
-        console.error('Deployment error:', error);
-        process.exit(1);
+    const gasPrice = await ethers.provider.getFeeData()
+      .then(data => data.gasPrice)
+      .catch(() => {
+        // Use fallback price from config if provider doesn't support it
+        console.log("Using fallback gas price from config");
+        return undefined; // Hardhat will use the config's gas price
       });
+    
+    const networkManager = await NetworkManager.deploy({
+      gasPrice: gasPrice
+    });
+
+    // Wait for deployment to finish
+    await networkManager.deploymentTransaction().wait();
+    
+    const contractAddress = await networkManager.getAddress();
+    console.log(`Contract deployed at address: ${contractAddress}`);
+    
+    // Get network information
+    const network = await ethers.provider.getNetwork();
+    const networkId = network.chainId;
+    
+    // Save deployment information
+    const fs = require("fs-extra");
+    const path = require("path");
+    
+    // Create deployed directory if it doesn't exist
+    const deployedDir = path.resolve(__dirname, "../deployed");
+    fs.ensureDirSync(deployedDir);
+    
+    // Read ABI from artifacts
+    const artifact = await hre.artifacts.readArtifact("NetworkManager");
     
     // Save deployment info
-    const deploymentPath = path.resolve(__dirname, '../deployed');
-    fs.ensureDirSync(deploymentPath);
-    
     const deploymentInfo = {
-      contractName: 'NetworkManager',
-      address: deployedContract.options.address,
+      contractName: "NetworkManager",
+      address: contractAddress,
       network: `xdc-subnet-${networkId}`,
       deployedAt: new Date().toISOString(),
-      deployTransaction: deployedContract.transactionHash,
-      abi: compiled.abi
+      deployTransaction: networkManager.deploymentTransaction().hash,
+      abi: artifact.abi
     };
     
+    const deploymentPath = path.join(deployedDir, `NetworkManager-${networkId}.json`);
     fs.writeFileSync(
-      path.resolve(deploymentPath, `NetworkManager-${networkId}.json`),
+      deploymentPath,
       JSON.stringify(deploymentInfo, null, 2)
     );
     
     console.log(`Deployment information saved to ./deployed/NetworkManager-${networkId}.json`);
-    console.log('Deployment completed successfully!');
+    console.log("Deployment completed successfully!");
     
     // Log instructions for interaction
-    console.log('\nTo interact with the contract:');
-    console.log('1. Use the address:', deployedContract.options.address);
-    console.log('2. Connect to the subnet RPC URL:', subnetUrl);
+    console.log("\nTo interact with the contract:");
+    console.log("1. Use the address:", contractAddress);
+    console.log("2. Connect to the subnet RPC URL:", process.env.SUBNET_URL || "http://192.168.25.11:8545");
     
   } catch (error) {
-    console.error('Deployment failed:', error);
+    console.error("Deployment failed:", error);
     process.exit(1);
   }
 }
 
 // Execute deployment
-deployContract();
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });

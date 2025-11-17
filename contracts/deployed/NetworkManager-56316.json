@@ -1,42 +1,17 @@
 {
   "contractName": "NetworkManager",
-  "address": "0x1e6fc9129e14ad8109Bc4573c3c0CA521259eD26",
+  "address": "0x93BF04C97407650dFE6e2E3Ab6eDdef85d804556",
   "network": "xdc-subnet-56316",
-  "deployedAt": "2025-11-05T11:40:44.152Z",
+  "deployedAt": "2025-11-17T05:49:37.739Z",
+  "deployTransaction": "0x7b61ec1b73507e1f8db9642b0d7649d0b21c36f2dc6760d0fcf02612b1722e68",
   "abi": [
     {
-      "inputs": [],
-      "stateMutability": "nonpayable",
-      "type": "constructor",
-      "signature": "constructor"
-    },
-    {
       "anonymous": false,
       "inputs": [
         {
           "indexed": true,
           "internalType": "address",
-          "name": "oldManager",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "newManager",
-          "type": "address"
-        }
-      ],
-      "name": "ManagerChanged",
-      "type": "event",
-      "signature": "0x605c2dbf762e5f7d60a546d42e7205dcb1b011ebc62a61736a57c9089d3a4350"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "nodeAddress",
+          "name": "memberAddress",
           "type": "address"
         },
         {
@@ -47,8 +22,7 @@
         }
       ],
       "name": "MemberAdded",
-      "type": "event",
-      "signature": "0x5660dfedd5f2d238aa153a2c488e927eb29ea0e780d70089f0e90c7409a2079c"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -56,13 +30,12 @@
         {
           "indexed": true,
           "internalType": "address",
-          "name": "nodeAddress",
+          "name": "memberAddress",
           "type": "address"
         }
       ],
       "name": "MemberRemoved",
-      "type": "event",
-      "signature": "0x6e76fb4c77256006d9c38ec7d82b45a8c8f3c27b1d6766fffc42dfb8de684492"
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -70,13 +43,31 @@
         {
           "indexed": true,
           "internalType": "address",
-          "name": "nodeAddress",
+          "name": "memberAddress",
           "type": "address"
         }
       ],
       "name": "MemberUpdated",
-      "type": "event",
-      "signature": "0xc849ff69d29483b688b050076f9d03b1a618c93ea052a712bfd3224eb71da8e2"
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
     },
     {
       "inputs": [
@@ -119,8 +110,7 @@
       "name": "addMember",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0xafafd7cb"
+      "type": "function"
     },
     {
       "inputs": [],
@@ -133,9 +123,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true,
-      "signature": "0x7c0f6b35"
+      "type": "function"
     },
     {
       "inputs": [
@@ -156,7 +144,7 @@
             },
             {
               "internalType": "address",
-              "name": "nodeAddress",
+              "name": "memberAddress",
               "type": "address"
             },
             {
@@ -206,9 +194,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true,
-      "signature": "0x2ada2596"
+      "type": "function"
     },
     {
       "inputs": [
@@ -227,13 +213,11 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true,
-      "signature": "0xa230c524"
+      "type": "function"
     },
     {
       "inputs": [],
-      "name": "manager",
+      "name": "owner",
       "outputs": [
         {
           "internalType": "address",
@@ -242,111 +226,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true,
-      "signature": "0x481c6a75"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "memberAddresses",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true,
-      "signature": "0xcc4e6299"
-    },
-    {
-      "inputs": [],
-      "name": "memberCount",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true,
-      "signature": "0x11aee380"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "members",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "x500Name",
-          "type": "string"
-        },
-        {
-          "internalType": "address",
-          "name": "nodeAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "bytes",
-          "name": "publicKey",
-          "type": "bytes"
-        },
-        {
-          "internalType": "bool",
-          "name": "isActive",
-          "type": "bool"
-        },
-        {
-          "internalType": "uint256",
-          "name": "joinedAt",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "lastUpdated",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "serial",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint16",
-          "name": "platformVersion",
-          "type": "uint16"
-        },
-        {
-          "internalType": "string",
-          "name": "host",
-          "type": "string"
-        },
-        {
-          "internalType": "uint16",
-          "name": "port",
-          "type": "uint16"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function",
-      "constant": true,
-      "signature": "0x08ae4b0c"
+      "type": "function"
     },
     {
       "inputs": [
@@ -359,22 +239,27 @@
       "name": "removeMember",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x0b1ca49a"
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
       "inputs": [
         {
           "internalType": "address",
-          "name": "newManager",
+          "name": "newOwner",
           "type": "address"
         }
       ],
-      "name": "transferManagerRole",
+      "name": "transferOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x39801a91"
+      "type": "function"
     },
     {
       "inputs": [
@@ -417,8 +302,7 @@
       "name": "updateMemberDetails",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0xaa9e6192"
+      "type": "function"
     },
     {
       "inputs": [
@@ -436,42 +320,7 @@
       "name": "updateMemberStatus",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x457873c0"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "memberAddress",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "serial",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint16",
-          "name": "platformVersion",
-          "type": "uint16"
-        },
-        {
-          "internalType": "string",
-          "name": "host",
-          "type": "string"
-        },
-        {
-          "internalType": "uint16",
-          "name": "port",
-          "type": "uint16"
-        }
-      ],
-      "name": "updateSubnetMemberDetail",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0xd54595b0"
+      "type": "function"
     }
   ]
 }
