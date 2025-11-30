@@ -1,29 +1,8 @@
 services:
-  subnet4:
-    image: xinfinorg/xdcsubnets:v0.3.2
-    volumes:
-      - ${HOSTPWD}/xdcchain4:/work/xdcchain
-      - ${HOSTPWD}/genesis.json:/work/genesis.json
-    restart: always
-    env_file:
-      - subnet4.env
-    profiles:
-      - machine1
-    ports:
-      - 20306:20306/tcp
-      - 20306:20306/udp
-      - 8548:8548/tcp
-      - 8548:8548/udp
-      - 9558:9558/tcp
-      - 9558:9558/udp
-    networks:
-      docker_net:
-        ipv4_address: 192.168.25.18
-
   subnet1:
     image: xinfinorg/xdcsubnets:v0.3.2
     volumes:
-      - ${HOSTPWD}/xdcchain1:/work/xdcchain
+      - xdcchain1_data:/work/xdcchain
       - ${HOSTPWD}/genesis.json:/work/genesis.json
     restart: always
     env_file:
@@ -43,7 +22,7 @@ services:
   subnet2:
     image: xinfinorg/xdcsubnets:v0.3.2
     volumes:
-      - ${HOSTPWD}/xdcchain2:/work/xdcchain
+      - xdcchain2_data:/work/xdcchain
       - ${HOSTPWD}/genesis.json:/work/genesis.json
     restart: always
     env_file:
@@ -63,7 +42,7 @@ services:
   subnet3:
     image: xinfinorg/xdcsubnets:v0.3.2
     volumes:
-      - ${HOSTPWD}/xdcchain3:/work/xdcchain
+      - xdcchain3_data:/work/xdcchain
       - ${HOSTPWD}/genesis.json:/work/genesis.json
     restart: always
     env_file:
@@ -152,6 +131,14 @@ services:
     networks:
       docker_net:
         ipv4_address: 192.168.25.55
+volumes:
+  xdcchain1_data:
+    driver: local
+  xdcchain2_data:
+    driver: local
+  xdcchain3_data:
+    driver: local
+
 networks:
   docker_net:
     external: true

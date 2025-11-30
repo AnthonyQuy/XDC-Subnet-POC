@@ -1,0 +1,14 @@
+{
+  "parentnetUrl": "https://erpc.apothem.network/",
+  "parentnetChainId": "51",
+  "parentnetApp": "0xB8554B95FdcfeF9da2dD4d003594B5193E7499C2",
+  "subnetUrl": "http://192.168.25.11:8545",
+  "subnetChainId": "57539",
+  "subnetApp": "0xc6b4EBBf8e81Ed0A294ce6a4D04b57e61728230A",
+  "tokens": [
+    {
+      "name": "Subnet Sample Token",
+      "address": "0x70feeaf0c082B7b8025BDCFD7a326B6C3345cEe7"
+    }
+  ]
+}
