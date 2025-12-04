@@ -2,10 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { ListGroup, Card, Form, Spinner } from 'react-bootstrap';
 import contractService from '../utils/contractHelpers';
 
-const MemberList = ({ members, onSelectMember, loading }) => {
+interface MemberListProps {
+  members: string[];
+  onSelectMember: (address: string) => Promise<void>;
+  loading: boolean;
+}
+
+const MemberList: React.FC<MemberListProps> = ({ members, onSelectMember, loading }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredMembers, setFilteredMembers] = useState([]);
-  const [memberStatus, setMemberStatus] = useState({});
+  const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
+  const [memberStatus, setMemberStatus] = useState<Record<string, boolean>>({});
 
   // Filter members based on search term
   useEffect(() => {
@@ -22,12 +28,21 @@ const MemberList = ({ members, onSelectMember, loading }) => {
     const fetchMemberStatus = async () => {
       if (!members || members.length === 0) return;
       
-      const statusObj = {};
+      const statusObj: Record<string, boolean> = {};
       for (const address of members) {
         try {
+          // First check if member exists to avoid unnecessary RPC errors
+          const exists = await contractService.isMember(address);
+          if (!exists) {
+            console.warn(`Member ${address} not found in contract`);
+            statusObj[address] = false;
+            continue;
+          }
+          
           const member = await contractService.getMember(address);
           statusObj[address] = member.isActive;
         } catch (error) {
+          console.error(`Error fetching status for ${address}:`, error);
           statusObj[address] = false;
         }
       }

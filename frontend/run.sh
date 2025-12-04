@@ -6,6 +6,19 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Handle stop command
+if [[ "$1" == "stop" ]]; then
+  echo -e "${YELLOW}Stopping XDC Network Manager Frontend Docker containers...${NC}"
+  docker compose -p xdc down
+  if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Frontend Docker containers stopped successfully.${NC}"
+  else
+    echo -e "${RED}Failed to stop containers. Check Docker logs for more information.${NC}"
+    exit 1
+  fi
+  exit 0
+fi
+
 echo -e "${YELLOW}Starting XDC Network Manager Frontend Development Environment${NC}"
 echo "-----------------------------------------------------------------"
 
@@ -30,13 +43,13 @@ else
 fi
 
 # Check if containers are already running
-if docker ps | grep networkmanager-frontend-dev > /dev/null; then
+if docker ps | grep xdc-frontend-dev > /dev/null; then
   echo -e "${YELLOW}Frontend development container is already running.${NC}"
   echo -e "${YELLOW}Do you want to restart it? (y/n)${NC}"
   read -r answer
   if [[ $answer =~ ^[Yy]$ ]]; then
     echo -e "${YELLOW}Stopping existing container...${NC}"
-    docker-compose -f docker-compose.dev.yml down
+    docker compose -p xdc down
   else
     echo -e "${GREEN}Exiting. Container is still running.${NC}"
     exit 0
@@ -45,20 +58,19 @@ fi
 
 # Build and start the containers
 echo -e "${YELLOW}Building and starting the development container...${NC}"
-docker-compose -f docker-compose.dev.yml --env-file .env up --build -d
-
+docker compose -p xdc up --build -d
 
 # Check if container started successfully
-if docker ps | grep networkmanager-frontend-dev > /dev/null; then
+if docker ps | grep xdc-frontend-dev > /dev/null; then
   echo -e "${GREEN}Development container started successfully!${NC}"
-  echo -e "${GREEN}React development server is running at: http://localhost:3000${NC}"
+  echo -e "${GREEN}Vite development server is running at: http://localhost:3000${NC}"
   echo -e "${YELLOW}The source code is mounted to the container, so any changes you make will be reflected immediately.${NC}"
 else
   echo -e "${RED}Failed to start container. Check the logs for more information:${NC}"
-  docker-compose -f docker-compose.dev.yml logs
+  docker compose -p xdc logs
   exit 1
 fi
 
 # Show logs
 echo -e "${YELLOW}Showing container logs (press Ctrl+C to exit logs but keep the container running):${NC}"
-docker-compose -f docker-compose.dev.yml logs -f
+docker compose -p xdc logs -f xdc

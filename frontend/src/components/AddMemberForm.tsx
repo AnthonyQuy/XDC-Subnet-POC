@@ -1,25 +1,41 @@
 import React, { useState } from "react";
-import { Card, Form, Button, Spinner } from "react-bootstrap";
+import { Card, Form, Button, Spinner, Alert } from "react-bootstrap";
 import { toast } from "react-toastify";
+import { validateMemberData } from "../utils/validationHelpers";
+import type { MemberFormData } from '../types/contract';
 
-const AddMemberForm = ({ onAddMember, loading }) => {
-  const [formData, setFormData] = useState({
+interface AddMemberFormProps {
+  onAddMember: (memberData: MemberFormData) => Promise<{ success: boolean; error?: string }>;
+  loading: boolean;
+}
+
+interface FormState {
+  address: string;
+  x500Name: string;
+  certSerialHex: string;
+  platformVersion: string;
+  host: string;
+  port: string;
+}
+
+const AddMemberForm: React.FC<AddMemberFormProps> = ({ onAddMember, loading }) => {
+  const [formData, setFormData] = useState<FormState>({
     address: "",
     x500Name: "",
-    publicKey: "",
-    serial: "1732382838913",
+    certSerialHex: "0x1732382838913",
     platformVersion: "12",
     host: "contour.p2p.app.contournetwork.io",
     port: "10030",
   });
   const [validated, setValidated] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
 
@@ -31,29 +47,73 @@ const AddMemberForm = ({ onAddMember, loading }) => {
 
     setValidated(true);
 
-    // Check if address is valid Ethereum address
-    if (!formData.address.match(/^0x[a-fA-F0-9]{40}$/)) {
-      toast.error(
-        "Please enter a valid Ethereum address (0x followed by 40 hex characters)"
-      );
+    // Perform comprehensive validation
+    const validation = validateMemberData({
+      address: formData.address,
+      x500Name: formData.x500Name,
+      certSerialHex: formData.certSerialHex,
+      platformVersion: formData.platformVersion,
+      host: formData.host,
+      port: formData.port
+    });
+
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
+      
+      // Show first error in toast
+      const firstError = Object.values(validation.errors)[0];
+      toast.error(firstError);
       return;
     }
 
-    onAddMember(formData);
+    // Clear validation errors
+    setValidationErrors({});
 
-    // Reset form
-    setFormData({
-      address: "",
-      x500Name: "",
-      publicKey: "",
-    });
-    setValidated(false);
+    // Convert types to match smart contract expectations
+    const data: MemberFormData = {
+      address: formData.address.trim(),
+      x500Name: formData.x500Name.trim(),
+      certSerialHex: validation.sanitizedCertSerial || formData.certSerialHex,
+      platformVersion: parseInt(formData.platformVersion, 10),
+      host: formData.host.trim(),
+      port: parseInt(formData.port, 10)
+    };
+
+    // Wait for transaction to complete
+    const result = await onAddMember(data);
+
+    // Only reset form if transaction was successful
+    if (result && result.success) {
+      setFormData({
+        address: "",
+        x500Name: "",
+        certSerialHex: "0x1732382838913",
+        platformVersion: "12",
+        host: "contour.p2p.app.contournetwork.io",
+        port: "10030",
+      });
+      setValidated(false);
+      setValidationErrors({});
+    }
+    // If transaction failed, keep form data so user can retry
   };
 
   return (
     <Card className="shadow-sm">
       <Card.Header as="h5">Add New Member</Card.Header>
       <Card.Body>
+        {Object.keys(validationErrors).length > 0 && (
+          <Alert variant="danger" className="mb-3">
+            <Alert.Heading>Validation Errors</Alert.Heading>
+            <ul className="mb-0">
+              {Object.entries(validationErrors).map(([field, error]) => (
+                <li key={field}>
+                  <strong>{field}:</strong> {error}
+                </li>
+              ))}
+            </ul>
+          </Alert>
+        )}
         <Form noValidate validated={validated} onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
             <Form.Label>Member Address</Form.Label>
@@ -93,36 +153,22 @@ const AddMemberForm = ({ onAddMember, loading }) => {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Public Key</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              name="publicKey"
-              placeholder="Enter public key"
-              value={formData.publicKey}
-              onChange={handleChange}
-              required
-            />
-            <Form.Control.Feedback type="invalid">
-              Please provide the member's public key.
-            </Form.Control.Feedback>
-            <Form.Text className="text-muted">
-              The public key will be used for encryption/verification
-            </Form.Text>
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Serial Number</Form.Label>
+            <Form.Label>Certificate Serial (Hex)</Form.Label>
             <Form.Control
               type="text"
-              name="serial"
-              placeholder="Enter serial number"
-              value={formData.serial}
+              name="certSerialHex"
+              placeholder="0x1234567890abcdef"
+              value={formData.certSerialHex}
               onChange={handleChange}
               required
+              isInvalid={!!validationErrors.certSerialHex}
             />
             <Form.Control.Feedback type="invalid">
-              Please provide a serial number.
+              {validationErrors.certSerialHex || "Please provide the X.509 certificate serial number in hex format."}
             </Form.Control.Feedback>
+            <Form.Text className="text-muted">
+              X.509 certificate serial number in hex format (e.g., 0x1234...). Used for PKI integration and certificate revocation.
+            </Form.Text>
           </Form.Group>
 
           <Form.Group className="mb-3">

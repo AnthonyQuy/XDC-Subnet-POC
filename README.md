@@ -25,7 +25,7 @@ This repository contains configurations for blockchain operations that require p
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/xdc-subnet-deployment.git
+   git clone https://github.com/AnthonyQuy/xdc-subnet-deployment.git
    cd xdc-subnet-deployment
    ```
 
@@ -77,7 +77,7 @@ This repository contains configurations for blockchain operations that require p
 1. Start the development environment:
    ```bash
    cd frontend
-   ./start-dev.sh
+   ./run.sh
    ```
 
 2. Access the application at http://localhost:3000

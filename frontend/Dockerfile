@@ -1,35 +1,22 @@
-# Multi-stage build for Frontend application
+FROM node:22-alpine
 
-# Build stage
-FROM node:18-alpine as build
-
-# Install Python and build dependencies needed for native modules
-RUN apk add --no-cache python3 make g++ 
+# Install required system dependencies
+RUN apk add --no-cache bash git python3 make g++ curl ca-certificates
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Copy package files for dependency installation
 COPY package*.json ./
+
+# Install Node.js dependencies
 RUN npm ci
 
-# Copy application source code
-COPY . .
+# Create necessary directories matching the actual project structure
+RUN mkdir -p /app/src \
+             /app/public \
+             /app/build \
+             /app/nginx
 
-# Build the application
-RUN npm run build
-
-# Production stage
-FROM nginx:alpine
-
-# Copy built files from build stage to nginx
-COPY --from=build /app/build /usr/share/nginx/html
-
-# Copy custom nginx configuration
-COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port
-EXPOSE 80
-
-# Command to run the container
-CMD ["nginx", "-g", "daemon off;"]
+# Keep container running
+CMD ["/bin/bash"]

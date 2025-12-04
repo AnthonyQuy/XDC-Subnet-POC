@@ -2,15 +2,21 @@ import React, { useState } from 'react';
 import { Card, Form, Button, Spinner } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 
-const ManageContract = ({ currentManager, onTransferManager, loading }) => {
+interface ManageContractProps {
+  currentManager: string;
+  onTransferManager: (newManagerAddress: string) => Promise<void>;
+  loading: boolean;
+}
+
+const ManageContract: React.FC<ManageContractProps> = ({ currentManager, onTransferManager, loading }) => {
   const [newManager, setNewManager] = useState('');
   const [validated, setValidated] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewManager(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     

@@ -1,44 +1,26 @@
-version: '3.8'
-
 services:
-  frontend:
+  xdc:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: networkmanager-frontend
+    container_name: xdc-frontend-dev
     ports:
-      - "3000:80"
-    environment:
-      - REACT_APP_DEFAULT_RPC_URL=http://192.168.25.11:8545
-      - REACT_APP_DEFAULT_CONTRACT_ADDRESS=${CONTRACT_ADDRESS:-""}
-    networks:
-      - docker_net
-    restart: unless-stopped
+      - "3000:3000"
     volumes:
-      - /app/node_modules
-    # For development mode using the React development server instead of nginx
-    # command: npm start
-    # volumes:
-    #   - .:/app
-    #   - /app/node_modules
-
-  # For local development without existing XDC network
-  # Comment out if using with existing XDC subnet
-  # xdc-node:
-  #   image: xdc/client:latest
-  #   container_name: xdc-dev-node
-  #   ports:
-  #     - "8545:8545"
-  #   networks:
-  #     docker_net:
-  #       ipv4_address: 192.168.25.11
-  #   volumes:
-  #     - xdc-data:/root/.ethereum
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./index.html:/app/index.html
+      - ./vite.config.ts:/app/vite.config.ts
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.node.json:/app/tsconfig.node.json
+      - ./docker.env:/app/.env
+    networks:
+      - xdc_subnet_network
+    stdin_open: true
+    tty: true
+    entrypoint: ["bash", "-c", "npm run dev"]
 
 networks:
-  docker_net:
+  xdc_subnet_network:
     external: true
-
-# For local development without existing XDC network
-# volumes:
-#   xdc-data:
+    name: docker_net

@@ -1,7 +1,15 @@
 import React from "react";
 import { Card, Button, Table, Badge } from "react-bootstrap";
+import type { Member } from '../types/contract';
 
-const MemberDetails = ({
+interface MemberDetailsProps {
+  member: Member;
+  isManager: boolean;
+  onRemoveMember: (address: string) => Promise<void>;
+  onUpdateStatus: (address: string, isActive: boolean) => Promise<void>;
+}
+
+const MemberDetails: React.FC<MemberDetailsProps> = ({
   member,
   isManager,
   onRemoveMember,
@@ -11,7 +19,7 @@ const MemberDetails = ({
 
   const handleRemove = () => {
     if (window.confirm("Are you sure you want to remove this member?")) {
-      onRemoveMember(member.nodeAddress);
+      onRemoveMember(member.memberAddress);
     }
   };
 
@@ -23,7 +31,7 @@ const MemberDetails = ({
         }?`
       )
     ) {
-      onUpdateStatus(member.nodeAddress, !member.isActive);
+      onUpdateStatus(member.memberAddress, !member.isActive);
     }
   };
 
@@ -44,24 +52,11 @@ const MemberDetails = ({
             </tr>
             <tr>
               <th>Address:</th>
-              <td className="text-break">{member.nodeAddress}</td>
+              <td className="text-break">{member.memberAddress}</td>
             </tr>
             <tr>
-              <th>Public Key:</th>
-              <td className="text-break">{member.publicKey}</td>
-            </tr>
-            <tr>
-              <th>Joined:</th>
-              <td>{member.joinedAt}</td>
-            </tr>
-            <tr>
-              <th>Last Updated:</th>
-              <td>{member.lastUpdated}</td>
-            </tr>
-
-            <tr>
-              <th>Serial Number:</th>
-              <td>{member.serial || "Not set"}</td>
+              <th>Certificate Serial (Hex):</th>
+              <td className="text-break font-monospace">{member.certSerialHex || "Not set"}</td>
             </tr>
             <tr>
               <th>Platform Version:</th>
