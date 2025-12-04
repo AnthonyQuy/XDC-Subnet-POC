@@ -1,30 +1,37 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.28;
+
+// Compatible with XDC Subnet
+pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract NetworkManager is Ownable, ReentrancyGuard {
-    constructor() Ownable(msg.sender) {}
+/**
+ * @title NetworkManager
+ * @dev Manages the membership and metadata of approved nodes in the XDC subnet.
+ * This contract works in conjunction with an off-chain Private PKI/CA system.
+ */
+contract NetworkManager is Ownable {
+    constructor() {}
 
+    // Struct to store metadata about an approved network member.
+    // The certificate itself is managed off-chain via PKI tools.
     struct NodeMember {
-        string x500Name; 
-        address memberAddress; 
-        bytes publicKey; 
-        bool isActive; 
-        uint256 joinedAt; 
-        uint256 lastUpdated; 
-        uint256 serial; 
-        uint16 platformVersion; 
-        string host; 
-        uint16 port; 
+        string x500Name;          // e.g., "C=US, ST=CA, L=SF, O=MyOrg, CN=node-abc"
+        address memberAddress;    // XDC/EVM address associated with the node
+        bytes certSerialHex;      // Hex representation of the X.509 Certificate Serial Number (for revocation matching)
+        bool isActive;            // Can this node participate in P2P consensus/communication?
+        uint256 joinedAt;         
+        uint256 lastUpdated;      
+        uint16 platformVersion;   // e.g., version of the node software
+        string host;              // Network host address (IP or DNS) for connection
+        uint16 port;              // P2P/gRPC port
     }
 
     mapping(address => NodeMember) private members;
     mapping(address => uint256) private memberIndex;
-    address[] private memberAddresses;
+    address[] private memberAddresses; // For easy iteration
 
-    event MemberAdded(address indexed memberAddress, string x500Name);
+    event MemberAdded(address indexed memberAddress, string x500Name, bytes certSerialHex);
     event MemberRemoved(address indexed memberAddress);
     event MemberUpdated(address indexed memberAddress);
 
@@ -38,11 +45,14 @@ contract NetworkManager is Ownable, ReentrancyGuard {
         _;
     }
 
+    /**
+     * @dev Owner adds a new approved member to the on-chain registry.
+     * The off-chain PKI process must run in parallel to issue actual certificates.
+     */
     function addMember(
         address memberAddress,
         string calldata x500Name,
-        bytes calldata publicKey,
-        uint256 serial,
+        bytes calldata certSerialHex,
         uint16 platformVersion,
         string calldata host,
         uint16 port
@@ -50,11 +60,10 @@ contract NetworkManager is Ownable, ReentrancyGuard {
         NodeMember memory newMember = NodeMember({
             x500Name: x500Name,
             memberAddress: memberAddress,
-            publicKey: publicKey,
+            certSerialHex: certSerialHex,
             isActive: true,
             joinedAt: block.timestamp,
             lastUpdated: block.timestamp,
-            serial: serial,
             platformVersion: platformVersion,
             host: host,
             port: port
@@ -64,9 +73,12 @@ contract NetworkManager is Ownable, ReentrancyGuard {
         memberIndex[memberAddress] = memberAddresses.length;
         memberAddresses.push(memberAddress);
 
-        emit MemberAdded(memberAddress, x500Name);
+        emit MemberAdded(memberAddress, x500Name, certSerialHex);
     }
 
+    /**
+     * @dev Removes a member. Requires manual certificate revocation off-chain.
+     */
     function removeMember(address memberAddress) external onlyOwner memberExists(memberAddress) {
         uint256 index = memberIndex[memberAddress];
         address lastMember = memberAddresses[memberAddresses.length - 1];
@@ -87,19 +99,20 @@ contract NetworkManager is Ownable, ReentrancyGuard {
         emit MemberUpdated(memberAddress);
     }
 
+    /**
+     * @dev Updates member details, including the new certificate serial number if re-issued.
+     */
     function updateMemberDetails(
         address memberAddress,
         string calldata x500Name,
-        bytes calldata publicKey,
-        uint256 serial,
+        bytes calldata certSerialHex,
         uint16 platformVersion,
         string calldata host,
         uint16 port
     ) external onlyOwner memberExists(memberAddress) {
         NodeMember storage member = members[memberAddress];
         member.x500Name = x500Name;
-        member.publicKey = publicKey;
-        member.serial = serial;
+        member.certSerialHex = certSerialHex;
         member.platformVersion = platformVersion;
         member.host = host;
         member.port = port;

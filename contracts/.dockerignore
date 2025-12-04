@@ -2,6 +2,7 @@
 node_modules/
 
 # Environment files (handled by docker-compose)
+*.env
 .env
 .env.local
 .env.*.local

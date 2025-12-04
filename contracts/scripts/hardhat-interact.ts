@@ -1,12 +1,13 @@
 import hre from "hardhat"
 import "hardhat/config";
-import "@nomicfoundation/hardhat-viem";  // ADD THIS LINE
+import "@nomicfoundation/hardhat-viem";
 
 import fs from "fs-extra";
 import path from "path";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
-import { toHex, hexToString } from "viem";
+import { hexToString, type Address, type Hex, type GetContractReturnType, type PublicClient, type WalletClient } from "viem";
+import type { NodeMember, NodeMemberDisplay } from "../types/NetworkManager.js";
 
 dotenv.config();
 
@@ -160,8 +161,14 @@ async function main() {
       transport: http(rpcUrl)
     });
 
-    const networkManager = getContract({
-      address: deployment.address as `0x${string}`,
+    type NetworkManagerContract = GetContractReturnType<
+      typeof deployment.abi,
+      { public: PublicClient; wallet: WalletClient },
+      Address
+    >;
+
+    const networkManager: NetworkManagerContract = getContract({
+      address: deployment.address as Address,
       abi: deployment.abi,
       client: { public: publicClient, wallet: walletClient }
     });
@@ -171,28 +178,30 @@ async function main() {
     // Process command
     switch (command) {
       case "getManager":
-        const manager = await networkManager.read.owner([]);
+        const manager = await networkManager.read.owner([]) as Address;
         console.log(`Current manager: ${manager}`);
         break;
 
       case "addMember":
         if (args.length < 7) {
-          console.error("Usage: COMMAND=addMember ARGS=address|x500Name|publicKey|serial|platformVersion|host|port npx hardhat run scripts/hardhat-interact.ts --network subnet");
-          console.error("Required args: address, x500Name, publicKey, serial, platformVersion, host, port");
+          console.error("Usage: COMMAND=addMember ARGS=address|x500Name|certSerialHex|platformVersion|host|port npx hardhat run scripts/hardhat-interact.ts --network subnet");
+          console.error("Required args: address, x500Name, certSerialHex, platformVersion, host, port");
           process.exit(1);
         }
 
-        const [memberAddress, x500Name, publicKey, serial, platformVersion, host, port] = args;
+        const [memberAddress, x500Name, certSerialHex, platformVersion, host, port] = args;
 
-        const addHash = await networkManager.write.addMember([
-          memberAddress as `0x${string}`,
-          x500Name,
-          toHex(publicKey),
-          BigInt(serial),
-          parseInt(platformVersion),
-          host,
-          parseInt(port)
-        ], {} as any);
+        const addHash = await networkManager.write.addMember(
+          [
+            memberAddress as Address,
+            x500Name,
+            certSerialHex as Hex,
+            parseInt(platformVersion),
+            host,
+            parseInt(port)
+          ],
+          {} as any
+        ) as Hex;
         await publicClient.waitForTransactionReceipt({ hash: addHash });
 
         console.log(`Member added successfully`);
@@ -205,7 +214,10 @@ async function main() {
           process.exit(1);
         }
 
-        const removeHash = await networkManager.write.removeMember([args[0] as `0x${string}`], {} as any);
+        const removeHash = await networkManager.write.removeMember(
+          [args[0] as Address],
+          {} as any
+        ) as Hex;
         await publicClient.waitForTransactionReceipt({ hash: removeHash });
 
         console.log(`Member removed successfully`);
@@ -219,37 +231,42 @@ async function main() {
           process.exit(1);
         }
 
-        const getMemberAddress = args[0].trim() as `0x${string}`;
+        const getMemberAddress = args[0].trim() as Address;
 
-        const members = await networkManager.read.getAllMembers([]);
+        const members = await networkManager.read.getAllMembers([]) as Address[];
         console.log("Current members in the network:", members);
 
         console.log(`Fetching details for member: ${getMemberAddress}`);
-        const member = await networkManager.read.getMember([getMemberAddress]) as any;
+        const member = await networkManager.read.getMember([getMemberAddress]) as NodeMember;
 
-        let publicKeyDisplay: string;
+        // Convert bigints to numbers for display
+        const memberDisplay: NodeMemberDisplay = {
+          x500Name: member.x500Name,
+          memberAddress: member.memberAddress,
+          certSerialHex: member.certSerialHex,
+          isActive: member.isActive,
+          joinedAt: Number(member.joinedAt),
+          lastUpdated: Number(member.lastUpdated),
+          platformVersion: member.platformVersion,
+          host: member.host,
+          port: member.port,
+        };
+
+        let certSerialDisplay: string;
         try {
-          publicKeyDisplay = member.publicKey ? hexToString(member.publicKey).replace(/\0/g, "") : "(empty)";
+          certSerialDisplay = member.certSerialHex ? hexToString(member.certSerialHex).replace(/\0/g, "") : "(empty)";
         } catch (error) {
-          publicKeyDisplay = `(hex) ${member.publicKey}`;
+          certSerialDisplay = `(hex) ${member.certSerialHex}`;
         }
 
         console.log("Member details:");
-        console.log("  X500 Name:", member.x500Name);
-        console.log("  Address:", member.memberAddress);
-        console.log("  Public Key:", publicKeyDisplay);
-        console.log("  Active:", member.isActive);
-        console.log("  Joined:", new Date(Number(member.joinedAt) * 1000).toLocaleString());
-        console.log("  Last Updated:", new Date(Number(member.lastUpdated) * 1000).toLocaleString());
-        console.log("  Serial:", member.serial.toString());
-        console.log("  Platform Version:", member.platformVersion);
-        console.log("  Host:", member.host);
-        console.log("  Port:", member.port);
+        console.log(JSON.stringify(memberDisplay, null, 2));
+        console.log(`Certificate Serial (decoded): ${certSerialDisplay}`);
         break;
 
       case "getAllMembers":
         console.log("Fetching all member addresses...");
-        const memberAddresses : object[] = await networkManager.read.getAllMembers([]) as any;
+        const memberAddresses = await networkManager.read.getAllMembers([]) as Address[];
         console.log("All members:", memberAddresses);
         console.log(`Total member count: ${memberAddresses.length}`);
         break;
@@ -263,30 +280,35 @@ async function main() {
 
         const isActive = args[1].toLowerCase() === "true";
 
-        const statusHash = await networkManager.write.updateMemberStatus([args[0] as `0x${string}`, isActive], {} as any);
+        const statusHash = await networkManager.write.updateMemberStatus(
+          [args[0] as Address, isActive],
+          {} as any
+        ) as Hex;
         await publicClient.waitForTransactionReceipt({ hash: statusHash });
 
         console.log(`Member status updated successfully`);
         break;
 
       case "updateDetails":
-        if (args.length < 7) {
-          console.error("Usage: COMMAND=updateDetails ARGS=address|x500Name|publicKey|serial|platformVersion|host|port npx hardhat run scripts/hardhat-interact.ts --network subnet");
-          console.error("Required args: address, x500Name, publicKey, serial, platformVersion, host, port");
+        if (args.length < 6) {
+          console.error("Usage: COMMAND=updateDetails ARGS=address|x500Name|certSerialHex|platformVersion|host|port npx hardhat run scripts/hardhat-interact.ts --network subnet");
+          console.error("Required args: address, x500Name, certSerialHex, platformVersion, host, port");
           process.exit(1);
         }
 
-        const [updateAddress, updateName, updateKey, updateSerial, updatePlatformVersion, updateHost, updatePort] = args;
+        const [updateAddress, updateName, updateCertSerial, updatePlatformVersion, updateHost, updatePort] = args;
 
-        const updateHash = await networkManager.write.updateMemberDetails([
-          updateAddress as `0x${string}`,
-          updateName,
-          toHex(updateKey),
-          BigInt(updateSerial),
-          parseInt(updatePlatformVersion),
-          updateHost,
-          parseInt(updatePort)
-        ], {} as any);
+        const updateHash = await networkManager.write.updateMemberDetails(
+          [
+            updateAddress as Address,
+            updateName,
+            updateCertSerial as Hex,
+            parseInt(updatePlatformVersion),
+            updateHost,
+            parseInt(updatePort)
+          ],
+          {} as any
+        ) as Hex;
         await publicClient.waitForTransactionReceipt({ hash: updateHash });
 
         console.log(`Member details updated successfully`);
@@ -300,7 +322,10 @@ async function main() {
         }
 
         // Note: Using transferOwnership() instead of transferManagerRole() as per the Ownable contract
-        const transferHash = await networkManager.write.transferOwnership([args[0] as `0x${string}`], {} as any);
+        const transferHash = await networkManager.write.transferOwnership(
+          [args[0] as Address],
+          {} as any
+        ) as Hex;
         await publicClient.waitForTransactionReceipt({ hash: transferHash });
 
         console.log(`Manager role transferred successfully`);
@@ -313,32 +338,33 @@ async function main() {
           process.exit(1);
         }
 
-        const isMember = await networkManager.read.isMember([args[0] as `0x${string}`]);
+        const isMember = await networkManager.read.isMember([args[0] as Address]) as boolean;
         console.log(`Address ${args[0]} is${isMember ? "" : " not"} a member.`);
         break;
 
       case "updateSubnetMemberDetail":
-        if (args.length < 5) {
-          console.error("Usage: COMMAND=updateSubnetMemberDetail ARGS=address|serial|platformVersion|host|port npx hardhat run scripts/hardhat-interact.ts --network subnet");
-          console.error("Required args: address, serial, platformVersion, host, port");
+        if (args.length < 4) {
+          console.error("Usage: COMMAND=updateSubnetMemberDetail ARGS=address|platformVersion|host|port npx hardhat run scripts/hardhat-interact.ts --network subnet");
+          console.error("Required args: address, platformVersion, host, port");
           process.exit(1);
         }
 
-        const [subnetAddress, serialID, platformVer, newHost, newPort] = args;
+        const [subnetAddress, platformVer, newHost, newPort] = args;
 
-        // Since there's no direct method for updateSubnetMemberDetail in the contract,
-        // we need to get the current details first and then update only the subnet details
-        const currentMember = await networkManager.read.getMember([subnetAddress as `0x${string}`]) as any;
+        // Get current details first and then update only the subnet connection details
+        const currentMember = await networkManager.read.getMember([subnetAddress as Address]) as NodeMember;
 
-        const subnetHash = await networkManager.write.updateMemberDetails([
-          subnetAddress as `0x${string}`,
-          currentMember.x500Name, // Keep the current X500 name
-          currentMember.publicKey, // Keep the current public key
-          BigInt(serialID),
-          parseInt(platformVer),
-          newHost,
-          parseInt(newPort)
-        ], {} as any);
+        const subnetHash = await networkManager.write.updateMemberDetails(
+          [
+            subnetAddress as Address,
+            currentMember.x500Name, // Keep the current X500 name
+            currentMember.certSerialHex, // Keep the current cert serial
+            parseInt(platformVer),
+            newHost,
+            parseInt(newPort)
+          ],
+          {} as any
+        ) as Hex;
         await publicClient.waitForTransactionReceipt({ hash: subnetHash });
 
         console.log(`Subnet details updated successfully`);
@@ -348,17 +374,18 @@ async function main() {
       default:
         console.log("Available commands:");
         console.log("  getManager                                  - Get the current manager address");
-        console.log("  addMember [address] [x500Name] [publicKey] [serial] [platformVersion] [host] [port] - Add a new member");
+        console.log("  addMember [address] [x500Name] [certSerialHex] [platformVersion] [host] [port] - Add a new member");
         console.log("  removeMember [address]                      - Remove a member");
         console.log("  getMember [address]                         - Get member details");
         console.log("  getAllMembers                               - List all member addresses");
         console.log("  updateStatus [address] [isActive]           - Update member status (true/false)");
-        console.log("  updateDetails [address] [x500Name] [publicKey] [serial] [platformVersion] [host] [port] - Update member details");
+        console.log("  updateDetails [address] [x500Name] [certSerialHex] [platformVersion] [host] [port] - Update member details");
         console.log("  transferManager [newManagerAddress]         - Transfer manager role to new address");
         console.log("  isMember [address]                          - Check if an address is a member");
-        console.log("  updateSubnetMemberDetail [address] [serial] [platformVersion] [host] [port] - Update subnet details");
+        console.log("  updateSubnetMemberDetail [address] [platformVersion] [host] [port] - Update subnet details");
         console.log("  help                                        - Display this help message");
         console.log("\nNote: Use pipe (|) to separate arguments when using ARGS environment variable");
+        console.log("Note: certSerialHex should be the X.509 certificate serial number in hex format (e.g., 0x1234...)");
         break;
     }
 

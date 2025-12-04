@@ -11,7 +11,10 @@
     "deploy:reset": "hardhat ignition deploy ./ignition/modules/NetworkManager.ts --network subnet --reset",
     "interact": "hardhat run scripts/hardhat-interact.ts --network subnet",
     "test": "hardhat test",
-    "node": "hardhat node"
+    "node": "hardhat node",
+    "bootstrap": "tsx bootstrap/bootstrap.ts",
+    "bootstrap:verify": "tsx bootstrap/verify-setup.ts",
+    "bootstrap:cleanup": "bash bootstrap/cleanup-pki.sh"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
@@ -22,11 +25,12 @@
     "@nomicfoundation/hardhat-ignition-viem": "^3.0.5",
     "@nomicfoundation/hardhat-toolbox-viem": "^5.0.1",
     "@nomicfoundation/hardhat-viem": "^3.0.1",
-    "@openzeppelin/contracts": "^5.4.0",
+    "@openzeppelin/contracts": "^4.9.6",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^22.19.1",
     "forge-std": "github:foundry-rs/forge-std#v1.9.4",
     "hardhat": "^3.0.16",
+    "tsx": "^4.21.0",
     "typescript": "~5.8.0",
     "viem": "^2.40.3"
   }

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.28;
+
+// Compatible with XDC Subnet
+pragma solidity 0.8.19;
 
 import {NetworkManager} from "./NetworkManager.sol";
 import {Test} from "forge-std/Test.sol";
@@ -10,6 +12,11 @@ contract NetworkManagerTest is Test {
     address member1;
     address member2;
     address nonOwner;
+
+    // Event declarations for testing
+    event MemberAdded(address indexed memberAddress, string x500Name, bytes certSerialHex);
+    event MemberRemoved(address indexed memberAddress);
+    event MemberUpdated(address indexed memberAddress);
 
     function setUp() public {
         owner = address(this);
@@ -32,8 +39,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
@@ -47,13 +53,12 @@ contract NetworkManagerTest is Test {
 
     function test_AddMemberEmitsEvent() public {
         vm.expectEmit(true, false, false, true);
-        emit NetworkManager.MemberAdded(member1, "CN=Node1, O=Org, L=City, C=US");
+        emit MemberAdded(member1, "CN=Node1, O=Org, L=City, C=US", hex"0a1b2c3d4e5f");
         
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
@@ -64,8 +69,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
@@ -75,7 +79,7 @@ contract NetworkManagerTest is Test {
         require(member.memberAddress == member1, "Member address should match");
         require(keccak256(bytes(member.x500Name)) == keccak256(bytes("CN=Node1, O=Org, L=City, C=US")), "X500 name should match");
         require(member.isActive == true, "Member should be active");
-        require(member.serial == 1001, "Serial should match");
+        require(keccak256(member.certSerialHex) == keccak256(hex"0a1b2c3d4e5f"), "Certificate serial should match");
         require(member.platformVersion == 1, "Platform version should match");
         require(keccak256(bytes(member.host)) == keccak256(bytes("node1.example.com")), "Host should match");
         require(member.port == 30303, "Port should match");
@@ -85,8 +89,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
@@ -96,8 +99,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
@@ -110,8 +112,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
@@ -122,8 +123,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
@@ -141,15 +141,14 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
         );
 
         vm.expectEmit(true, false, false, false);
-        emit NetworkManager.MemberRemoved(member1);
+        emit MemberRemoved(member1);
         
         networkManager.removeMember(member1);
     }
@@ -163,8 +162,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
@@ -179,8 +177,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
@@ -196,15 +193,14 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
         );
 
         vm.expectEmit(true, false, false, false);
-        emit NetworkManager.MemberUpdated(member1);
+        emit MemberUpdated(member1);
         
         networkManager.updateMemberStatus(member1, false);
     }
@@ -218,8 +214,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
@@ -228,8 +223,7 @@ contract NetworkManagerTest is Test {
         networkManager.updateMemberDetails(
             member1,
             "CN=NodeUpdated, O=NewOrg, L=NewCity, C=US",
-            hex"fedcba0987654321fedcba0987654321",
-            2002,
+            hex"fedcba987654",
             2,
             "updated.example.com",
             30304
@@ -237,7 +231,7 @@ contract NetworkManagerTest is Test {
 
         NetworkManager.NodeMember memory member = networkManager.getMember(member1);
         require(keccak256(bytes(member.x500Name)) == keccak256(bytes("CN=NodeUpdated, O=NewOrg, L=NewCity, C=US")), "X500 name should be updated");
-        require(member.serial == 2002, "Serial should be updated");
+        require(keccak256(member.certSerialHex) == keccak256(hex"fedcba987654"), "Certificate serial should be updated");
         require(member.platformVersion == 2, "Platform version should be updated");
         require(keccak256(bytes(member.host)) == keccak256(bytes("updated.example.com")), "Host should be updated");
         require(member.port == 30304, "Port should be updated");
@@ -247,21 +241,19 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
         );
 
         vm.expectEmit(true, false, false, false);
-        emit NetworkManager.MemberUpdated(member1);
+        emit MemberUpdated(member1);
         
         networkManager.updateMemberDetails(
             member1,
             "CN=NodeUpdated, O=NewOrg, L=NewCity, C=US",
-            hex"fedcba0987654321fedcba0987654321",
-            2002,
+            hex"fedcba987654",
             2,
             "updated.example.com",
             30304
@@ -272,8 +264,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1234567890abcdef1234567890abcdef",
-            1001,
+            hex"0a1b2c3d4e5f",
             1,
             "node1.example.com",
             30303
@@ -282,8 +273,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member2,
             "CN=Node2, O=Org, L=City, C=US",
-            hex"abcdef1234567890abcdef1234567890",
-            1002,
+            hex"1a2b3c4d5e6f",
             1,
             "node2.example.com",
             30304
@@ -301,8 +291,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member1,
             "CN=Node1, O=Org, L=City, C=US",
-            hex"1111111111111111111111111111111111111111111111111111111111111111",
-            1001,
+            hex"111111111111",
             1,
             "node1.example.com",
             30303
@@ -311,8 +300,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member2,
             "CN=Node2, O=Org, L=City, C=US",
-            hex"2222222222222222222222222222222222222222222222222222222222222222",
-            1002,
+            hex"222222222222",
             1,
             "node2.example.com",
             30304
@@ -321,8 +309,7 @@ contract NetworkManagerTest is Test {
         networkManager.addMember(
             member3,
             "CN=Node3, O=Org, L=City, C=US",
-            hex"3333333333333333333333333333333333333333333333333333333333333333",
-            1003,
+            hex"333333333333",
             1,
             "node3.example.com",
             30305
@@ -348,7 +335,6 @@ contract NetworkManagerTest is Test {
                 memberAddr,
                 "CN=Node, O=Org, L=City, C=US",
                 abi.encodePacked(keccak256(abi.encodePacked(i))),
-                1000 + i,
                 1,
                 "node.example.com",
                 30303 + i

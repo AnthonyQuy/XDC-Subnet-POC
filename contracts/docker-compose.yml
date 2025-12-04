@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   contract:
     build:
@@ -8,7 +6,6 @@ services:
     container_name: xdc-contract-dev
     volumes:
       - ./contracts:/app/contracts
-      - ./compile:/app/compile
       - ./scripts:/app/scripts
       
       - ./ignition:/app/ignition
@@ -19,11 +16,7 @@ services:
       
       - ./tsconfig.json:/app/tsconfig.json
       - ../subnet/genesis.json:/subnet/genesis.json:ro
-    env_file:
-      - ./.env
-    environment:
-      - SUBNET_URL=${SUBNET_URL:-http://192.168.25.11:8545}
-      - NETWORK_ID=${NETWORK_ID:-56316}
+      - ./docker.env:/app/.env
     networks:
       - xdc_subnet_network
     entrypoint: ["bash", "-c", "tail -f /dev/null"]

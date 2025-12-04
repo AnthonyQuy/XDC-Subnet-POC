@@ -1,0 +1,58 @@
+{
+  "members": [
+    {
+      "memberAddress": "0x1234567890123456789012345678901234567890",
+      "x500Name": "CN=Singapore-Node-01, O=XDC Network, OU=Asia Pacific, L=Singapore, C=SG",
+      "certSerialHex": "0x0a1b2c3d4e5f6071",
+      "platformVersion": 1,
+      "host": "node-sg-01.xdc.network",
+      "port": 30303
+    },
+    {
+      "memberAddress": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+      "x500Name": "CN=London-Node-01, O=XDC Network, OU=Europe, L=London, C=GB",
+      "certSerialHex": "0x1a2b3c4d5e6f7081",
+      "platformVersion": 1,
+      "host": "node-lon-01.xdc.network",
+      "port": 30303
+    },
+    {
+      "memberAddress": "0x9876543210987654321098765432109876543210",
+      "x500Name": "CN=NewYork-Node-01, O=XDC Network, OU=North America, L=New York, ST=NY, C=US",
+      "certSerialHex": "0x2b3c4d5e6f708192",
+      "platformVersion": 1,
+      "host": "node-ny-01.xdc.network",
+      "port": 30303
+    },
+    {
+      "memberAddress": "0x1111111111111111111111111111111111111111",
+      "x500Name": "CN=Tokyo-Node-01, O=XDC Network, OU=Asia Pacific, L=Tokyo, C=JP",
+      "certSerialHex": "0x3c4d5e6f708192a3",
+      "platformVersion": 1,
+      "host": "node-tok-01.xdc.network",
+      "port": 30303
+    },
+    {
+      "memberAddress": "0x2222222222222222222222222222222222222222",
+      "x500Name": "CN=Frankfurt-Node-01, O=XDC Network, OU=Europe, L=Frankfurt, C=DE",
+      "certSerialHex": "0x4d5e6f708192a3b4",
+      "platformVersion": 1,
+      "host": "node-fra-01.xdc.network",
+      "port": 30303
+    },
+    {
+      "memberAddress": "0x3333333333333333333333333333333333333333",
+      "x500Name": "CN=Sydney-Node-01, O=XDC Network, OU=Oceania, L=Sydney, ST=NSW, C=AU",
+      "certSerialHex": "0x5e6f708192a3b4c5",
+      "platformVersion": 1,
+      "host": "node-syd-01.xdc.network",
+      "port": 30303
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Example member data for NetworkManager contract testing and demonstration",
+    "totalMembers": 6,
+    "created": "2025-12-04"
+  }
+}

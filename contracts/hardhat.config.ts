@@ -25,13 +25,13 @@ try {
 
 // Load other values from .env
 const SUBNET_URL = process.env.SUBNET_URL || "http://192.168.25.11:8545";
-const PARENTNET_URL = process.env.PARENTNET_URL || "https://erpc.apothem.network/";
 const SUBNET_PK = process.env.SUBNET_PK || "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
 
 const config: HardhatUserConfig = defineConfig({
   plugins: [hardhatIgnitionViemPlugin],
   solidity: {
-    version: "0.8.28",
+    //XDC Subnet compatible
+    version: "0.8.19",
     settings: {
       optimizer: {
         enabled: true,
