@@ -157,9 +157,7 @@ class ContractService {
       // Initialize contract
       this.contract = new this.web3.eth.Contract(CONTRACT_ABI, contractAddr);
 
-      // Verify network and contract
       const chainId = await this.web3.eth.getChainId();
-      console.log('Connected to chain ID:', chainId);
 
       // Verify contract exists
       const code = await this.web3.eth.getCode(contractAddr);
@@ -204,9 +202,7 @@ class ContractService {
       // Initialize Web3 with the provided RPC URL
       this.web3 = new Web3(rpcUrl);
 
-      // Test connection
       const blockNumber = await this.web3.eth.getBlockNumber();
-      console.log('Connected to XDC network. Current block:', blockNumber);
 
       // Get accounts (for XDC, typically use the first account or allow user to specify)
       const accounts = await this.web3.eth.getAccounts();
@@ -349,10 +345,6 @@ class ContractService {
         port: Number(member.port || member[8] || 0)
       };
     } catch (error: any) {
-      // Log detailed error information
-      console.error('Error fetching member details for address:', address);
-      console.error('Error details:', error);
-      
       // Check for specific error types
       if (error.message && error.message.includes('Internal JSON-RPC error')) {
         // This typically means the contract reverted

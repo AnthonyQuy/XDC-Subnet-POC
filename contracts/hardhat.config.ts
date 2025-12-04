@@ -18,9 +18,7 @@ try {
   const genesisPath = join(process.cwd(),"..", "subnet", "genesis.json");
   const genesis = JSON.parse(readFileSync(genesisPath, "utf-8"));
   CHAIN_ID = genesis.config.chainId;
-  console.log(`✓ Loaded chainId ${CHAIN_ID} from subnet/genesis.json`);
 } catch (error) {
-  console.warn(`⚠ Could not read genesis.json, using default chainId: ${CHAIN_ID}`);
 }
 
 // Load other values from .env

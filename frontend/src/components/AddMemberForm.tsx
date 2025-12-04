@@ -47,7 +47,6 @@ const AddMemberForm: React.FC<AddMemberFormProps> = ({ onAddMember, loading }) =
 
     setValidated(true);
 
-    // Perform comprehensive validation
     const validation = validateMemberData({
       address: formData.address,
       x500Name: formData.x500Name,
@@ -60,16 +59,13 @@ const AddMemberForm: React.FC<AddMemberFormProps> = ({ onAddMember, loading }) =
     if (!validation.isValid) {
       setValidationErrors(validation.errors);
       
-      // Show first error in toast
       const firstError = Object.values(validation.errors)[0];
       toast.error(firstError);
       return;
     }
 
-    // Clear validation errors
     setValidationErrors({});
 
-    // Convert types to match smart contract expectations
     const data: MemberFormData = {
       address: formData.address.trim(),
       x500Name: formData.x500Name.trim(),
@@ -79,10 +75,8 @@ const AddMemberForm: React.FC<AddMemberFormProps> = ({ onAddMember, loading }) =
       port: parseInt(formData.port, 10)
     };
 
-    // Wait for transaction to complete
     const result = await onAddMember(data);
 
-    // Only reset form if transaction was successful
     if (result && result.success) {
       setFormData({
         address: "",
@@ -95,7 +89,6 @@ const AddMemberForm: React.FC<AddMemberFormProps> = ({ onAddMember, loading }) =
       setValidated(false);
       setValidationErrors({});
     }
-    // If transaction failed, keep form data so user can retry
   };
 
   return (

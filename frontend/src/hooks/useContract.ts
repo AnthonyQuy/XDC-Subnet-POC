@@ -20,7 +20,6 @@ export const useContract = (): ContractHookReturn => {
     error: null,
   });
 
-  // Update state from contract service
   const syncState = useCallback(() => {
     setState(prev => ({
       ...prev,
@@ -30,7 +29,6 @@ export const useContract = (): ContractHookReturn => {
     }));
   }, []);
 
-  // Fetch contract data (owner, members)
   const fetchContractData = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, loading: true }));
@@ -56,16 +54,13 @@ export const useContract = (): ContractHookReturn => {
     }
   }, []);
 
-  // Handle connection state changes
   useEffect(() => {
     const handleStateChange = () => {
       syncState();
 
-      // If connected, fetch contract data
       if (contractService.isConnected) {
         fetchContractData();
       } else {
-        // Clear data on disconnect
         setState(prev => ({
           ...prev,
           owner: '',
@@ -76,10 +71,8 @@ export const useContract = (): ContractHookReturn => {
       }
     };
 
-    // Subscribe to state changes
     contractService.on('stateChange', handleStateChange);
 
-    // Check for existing connection on mount
     const initConnection = async () => {
       const restored = await contractService.restoreConnection();
       if (restored) {
@@ -91,13 +84,11 @@ export const useContract = (): ContractHookReturn => {
 
     initConnection();
 
-    // Cleanup
     return () => {
       contractService.off('stateChange', handleStateChange);
     };
   }, [syncState, fetchContractData]);
 
-  // Connect to network via RPC
   const connect = useCallback(async (rpcUrl: string, contractAddr: string) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
@@ -116,7 +107,6 @@ export const useContract = (): ContractHookReturn => {
     }
   }, [syncState, fetchContractData]);
 
-  // Connect via MetaMask
   const connectWithMetaMask = useCallback(async (contractAddr: string) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
@@ -135,13 +125,11 @@ export const useContract = (): ContractHookReturn => {
     }
   }, [syncState, fetchContractData]);
 
-  // Disconnect from network
   const disconnect = useCallback(() => {
     contractService.disconnect();
     toast.info('Wallet disconnected');
   }, []);
 
-  // Select a member
   const selectMember = useCallback(async (address: string) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));

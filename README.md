@@ -1,112 +1,545 @@
-# XDC Subnet Deployment
+# XDC SubnetFoundry
 
-A comprehensive toolkit for deploying and managing XDC Network subnets with secure contract interactions.
+**Build Your Enterprise Network with XDC Subnet**
+
+A comprehensive toolkit for deploying and managing private XDC blockchain networks with smart contract governance and intuitive web interface.
 
 ## 🔒 Important Security Notice
 
 This repository contains configurations for blockchain operations that require private keys and sensitive data. Before using or contributing to this project, please read the [SECURITY.md](SECURITY.md) file for important information about protecting your sensitive data.
 
+## 🎯 Overview
+
+XDC SubnetFoundry is an enterprise-ready platform that provides everything you need to deploy and manage a private XDC blockchain network. It combines blockchain infrastructure, smart contract governance, and a user-friendly web interface into a single, integrated solution.
+
+**Perfect for:**
+- Enterprise private blockchain deployments
+- Consortium networks requiring node membership governance
+- Development and testing environments
+- Proof-of-concept blockchain applications
+
+## 🏗️ Architecture
+
+XDC SubnetFoundry is built on a 3-tier architecture:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    TIER 1: Frontend Layer                    │
+│         React + TypeScript + MetaMask Integration            │
+│              Port: 3000 (Docker) / 5173 (Dev)                │
+└────────────────────────────┬────────────────────────────────┘
+                             │ Web3.js RPC Calls
+                             ↓
+┌─────────────────────────────────────────────────────────────┐
+│                TIER 2: Smart Contract Layer                  │
+│           NetworkManager.sol (On-chain Governance)           │
+│              Deployed on Subnet via Hardhat                  │
+└────────────────────────────┬────────────────────────────────┘
+                             │ Connected to Validators
+                             ↓
+┌─────────────────────────────────────────────────────────────┐
+│              TIER 3: Blockchain Infrastructure               │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │ Validator 1  │  │ Validator 2  │  │ Validator 3  │      │
+│  │ Port: 8545   │  │ Port: 8546   │  │ Port: 8547   │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+│           ↑               ↑               ↑                  │
+│           └───────┬───────┴───────┬───────┘                  │
+│                Bootnode (Discovery)                          │
+│           Chain ID: 57539 | Network: docker_net              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Tier 1: Frontend Layer
+**Location:** `/frontend/`
+
+A modern React web application providing:
+- **Dual Connection Modes**: MetaMask wallet integration or direct RPC connection
+- **Network Detection**: Automatic XDC Subnet detection and one-click switching
+- **Member Management**: Add, update, remove, and query network members
+- **Role-Based UI**: Different views for network managers vs. regular users
+- **Real-time Updates**: Live blockchain state monitoring and notifications
+
+**Technology Stack:**
+- React 19 + TypeScript
+- Vite 6 (build tool)
+- Web3.js 4.16 (blockchain interaction)
+- Bootstrap 5 (UI framework)
+- React Toastify (notifications)
+
+### Tier 2: Smart Contract Layer
+**Location:** `/contracts/`
+
+Smart contracts deployed on the XDC subnet for decentralized governance:
+- **NetworkManager Contract**: Stores and manages network member information
+- **X.500 Distinguished Names**: Enterprise-standard identity format
+- **Comprehensive Member Data**: Address, public key, host, port, status, and more
+- **Access Control**: Owner-only administrative functions
+- **Event Logging**: All state changes emit events for transparency
+
+**Technology Stack:**
+- Solidity 0.8.x
+- Hardhat 3 (development framework)
+- OpenZeppelin Contracts (security)
+- TypeScript (deployment scripts)
+- Docker (isolated environment)
+
+### Tier 3: Blockchain Infrastructure
+**Location:** `/subnet/`
+
+A complete XDC subnet with:
+- **3 Validator Nodes**: Running XDPoS consensus for block production
+- **Bootnode**: Peer discovery and network coordination
+- **Pre-configured Genesis**: Ready-to-use blockchain configuration
+- **Management Tools**: CLI script for common operations
+- **Stats Service**: Network monitoring and visualization
+
+**Technology Stack:**
+- XDC Network nodes (Docker containers)
+- Docker Compose orchestration
+- Bash management scripts
+
 ## 📋 Features
 
-- XDC subnet node deployment and configuration
-- Smart contract deployment and management
-- NetworkManager contract for member governance
-- Frontend application for easy interaction with contracts
+### Blockchain Infrastructure
+✅ 3-node validator network with XDPoS consensus  
+✅ Pre-configured genesis block and network parameters  
+✅ Bootnode for automatic peer discovery  
+✅ Isolated Docker network for secure communication  
+✅ Pre-funded validator accounts for immediate use  
+✅ Network monitoring and management CLI tools  
 
-## 🚀 Getting Started
+### Smart Contract Governance
+✅ NetworkManager contract for member management  
+✅ X.500 Distinguished Name support for enterprise identity  
+✅ Comprehensive node information storage (10 fields per member)  
+✅ Active/inactive status management  
+✅ Owner-based access control with OpenZeppelin  
+✅ Complete event logging for audit trails  
+
+### Frontend Application
+✅ MetaMask integration with automatic network detection  
+✅ Direct RPC connection option for flexibility  
+✅ Real-time member list and status monitoring  
+✅ Add/update/remove member operations (manager only)  
+✅ Search and filter network members  
+✅ Responsive Bootstrap UI for all devices  
+✅ Toast notifications for all operations  
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Docker and Docker Compose
-- Node.js (v16+)
+**Required:**
+- Docker 20.10+ and Docker Compose 2.0+
+- Node.js 18+ (LTS recommended)
 - Git
 
-### Setup and Configuration
+**Recommended:**
+- MetaMask browser extension (for frontend wallet features)
+- 8GB+ RAM for running all services
+- macOS or Linux (Windows with WSL2)
 
-1. Clone the repository:
+### Installation
+
+1. **Clone the repository:**
    ```bash
-   git clone https://github.com/AnthonyQuy/xdc-subnet-deployment.git
-   cd xdc-subnet-deployment
+   git clone https://github.com/AnthonyQuy/XDC-SubnetFoundry.git
+   cd XDC-SubnetFoundry
    ```
 
-2. Set up environment configuration (choose one method):
+2. **Configure environment files:**
 
-   **Option 1: Environment Files**
+   **Contracts:**
    ```bash
-   # Create environment files from examples
-   cp generated/contract_deploy.env.example generated/contract_deploy.env
-   cp generated/subswap-frontend.config.json.example generated/subswap-frontend.config.json
-   cp frontend/.env.example frontend/.env
-   
-   # Edit the files with your actual values
-   nano generated/contract_deploy.env
-   nano generated/subswap-frontend.config.json
-   nano frontend/.env
+   cd contracts
+   cp .env.example .env
+   nano .env  # Add your configuration
+   cd ..
    ```
 
-   **Option 2: Environment Variables**
+   **Frontend:**
    ```bash
-   # Create environment setup script
-   cp env-setup.sh.example env-setup.sh
-   
-   # Edit the script with your actual values
-   nano env-setup.sh
-   
-   # Load environment variables
-   source ./env-setup.sh
+   cd frontend
+   cp .env.example .env
+   nano .env  # Add RPC URL and contract address
+   cd ..
    ```
 
-### Subnet Deployment
-
-1. Start the XDC subnet:
+3. **Start the XDC subnet:**
    ```bash
-   ./start.sh
+   cd subnet
+   ./subnet-manager.sh start
+   # Wait ~40 seconds for initialization
+   ./subnet-manager.sh status  # Verify nodes are mining
+   cd ..
    ```
 
-2. Deploy the NetworkManager contract:
+4. **Deploy the NetworkManager contract:**
    ```bash
    cd contracts
    ./run.sh
-   # Select option 2 to deploy the contract
+   # Select option 1: Compile contracts
+   # Select option 2: Deploy to XDC subnet
+   # Note the deployed contract address
+   cd ..
    ```
 
-### Frontend Application
-
-#### Development Mode
-
-1. Start the development environment:
+5. **Start the frontend:**
    ```bash
    cd frontend
+   # Update .env with the contract address from step 4
    ./run.sh
+   # Access at http://localhost:3000
    ```
 
-2. Access the application at http://localhost:3000
+## 🔧 How It Works
 
-#### Production Mode
+### Complete System Flow
 
-1. Build and run the frontend:
-   ```bash
-   cd frontend
-   docker-compose up -d --build
-   ```
+Here's how the components work together when adding a new member:
 
-2. Access the application at http://localhost:3000
+```
+1. USER ACTION (Frontend):
+   ┌─ Manager opens web app
+   ├─ Connects with MetaMask
+   ├─ Navigates to "Add Member" tab
+   ├─ Fills form with member details
+   └─ Clicks "Add Member" button
 
-## 📊 Project Structure
+2. TRANSACTION SUBMISSION (Frontend → Contract):
+   ┌─ Web3.js constructs transaction
+   ├─ MetaMask popup appears
+   ├─ User reviews and approves
+   ├─ Transaction sent to RPC endpoint (port 8545)
+   └─ Signed with user's private key
 
-- `/contracts` - Smart contract source code, deployment and interaction scripts
-- `/frontend` - React web application for contract interaction
-- `/generated` - Generated files and configuration for the XDC subnet
-- `/scripts` - Utility scripts for project management
+3. BLOCKCHAIN PROCESSING (Subnet):
+   ┌─ Validator 1 receives transaction
+   ├─ Transaction added to mempool
+   ├─ Next block includes transaction
+   ├─ All validators execute transaction
+   ├─ NetworkManager.addMember() runs
+   ├─ Member stored in contract state
+   ├─ MemberAdded event emitted
+   └─ Block confirmed across network
+
+4. UI UPDATE (Frontend):
+   ┌─ App detects transaction confirmation
+   ├─ Queries contract for updated member list
+   ├─ New member appears in UI
+   ├─ Success toast notification shown
+   └─ UI state synchronized with blockchain
+```
+
+### Data Flow Diagram
+
+```
+User Input → Frontend → Web3.js → RPC Endpoint → Validator Node
+    ↑                                                    ↓
+    │                                            Execute Contract
+    │                                                    ↓
+    └──────── UI Update ← Event Logs ← Blockchain State
+```
+
+### Key Interactions
+
+**1. Network Member Query:**
+```javascript
+// Frontend calls contract
+const members = await contract.methods.getAllMembers().call();
+// Returns array of member addresses
+
+// Get details for each member
+const details = await contract.methods.getMember(address).call();
+// Returns: x500Name, publicKey, host, port, isActive, etc.
+```
+
+**2. Adding a Member (Manager Only):**
+```javascript
+// Frontend constructs transaction
+await contract.methods.addMember(
+  memberAddress,
+  x500Name,
+  publicKey,
+  serial,
+  platformVersion,
+  host,
+  port
+).send({ from: managerAddress });
+// Requires MetaMask approval
+// Emits MemberAdded event
+```
+
+**3. Network Status Check:**
+```bash
+# CLI command checks all validators
+./subnet-manager.sh status
+
+# Returns:
+- Container status (running/stopped)
+- Peer connections (should be 2 peers each)
+- Mining status (block height increasing)
+- RPC endpoint availability
+```
+
+## 📊 Network Configuration
+
+### Default Settings
+
+| Component | Configuration | Value |
+|-----------|--------------|-------|
+| Chain ID | Network identifier | 57539 |
+| Network Name | Subnet name | myxdcsubnet |
+| Currency Symbol | Native token | SDC |
+| Consensus | Algorithm | XDPoS |
+| Block Time | Average | ~2 seconds |
+| Docker Network | Container network | docker_net |
+
+### RPC Endpoints
+
+| Node | HTTP RPC | WebSocket | Purpose |
+|------|----------|-----------|---------|
+| Validator 1 | http://localhost:8545 | ws://localhost:9555 | Primary endpoint |
+| Validator 2 | http://localhost:8546 | ws://localhost:9556 | Backup endpoint |
+| Validator 3 | http://localhost:8547 | ws://localhost:9557 | Load balancing |
+
+### Service Endpoints
+
+| Service | URL | Purpose |
+|---------|-----|---------|
+| Frontend | http://localhost:3000 | Web UI (Docker) |
+| Frontend Dev | http://localhost:5173 | Web UI (Vite dev) |
+| Stats Service | http://localhost:5213 | Network statistics |
+| Relayer | http://localhost:5215 | Cross-chain relay |
+
+### Validator Addresses
+
+```
+Validator 1: 0x2df20ad7ca79f6427cd339f16d98e3d05e1b4a91
+Validator 2: 0x41fe3a4527d9e601fee6018d10c990954c283559
+Validator 3: 0x566c95cc89db31a10b52c051bbb84347c87f27cc
+Foundation: 0x6a9442d19ea82a24b33018bb6807bde679f92a45
+```
+
+## 🛠️ Management & Operations
+
+### Subnet Management
+
+```bash
+cd subnet
+./subnet-manager.sh <command>
+```
+
+**Common Commands:**
+- `start` - Start the entire subnet
+- `stop` - Stop all services
+- `status` - Check subnet status
+- `peers` - View peer connections
+- `mining` - Check if blocks are being mined
+- `logs <service>` - View service logs
+- `info` - Display network configuration
+- `attach [node]` - Attach to node console
+
+### Contract Development
+
+```bash
+cd contracts
+./run.sh
+```
+
+**Interactive Menu:**
+1. Compile contracts
+2. Deploy to XDC subnet
+3. Interact with deployed contract
+4. Run tests
+5. Access container shell
+6. View logs
+7. Deep clean & rebuild
+
+### Frontend Development
+
+```bash
+cd frontend
+./run.sh
+```
+
+**Development Server:**
+- Hot reload enabled
+- TypeScript type checking
+- Browser auto-refresh
+- Console error reporting
+
+## 📁 Project Structure
+
+```
+XDC-SubnetFoundry/
+├── contracts/              # Smart Contract Layer
+│   ├── contracts/          # Solidity source files
+│   │   └── NetworkManager.sol
+│   ├── scripts/            # Deployment scripts
+│   ├── test/              # Contract tests
+│   ├── compiled/          # Build artifacts
+│   ├── deployed/          # Deployment records
+│   └── run.sh             # Management script
+│
+├── frontend/              # Frontend Application Layer
+│   ├── src/
+│   │   ├── components/    # React components
+│   │   ├── hooks/         # Custom hooks
+│   │   ├── utils/         # Helper functions
+│   │   ├── types/         # TypeScript types
+│   │   └── contracts/     # Contract ABI
+│   ├── public/            # Static assets
+│   └── run.sh             # Management script
+│
+└── subnet/                # Blockchain Infrastructure Layer
+    ├── xdcchain1/         # Validator 1 data
+    ├── xdcchain2/         # Validator 2 data
+    ├── xdcchain3/         # Validator 3 data
+    ├── bootnodes/         # Bootnode configuration
+    ├── scripts/           # Utility scripts
+    ├── genesis.json       # Genesis block config
+    └── subnet-manager.sh  # Management script
+```
+
+## 📚 Documentation
+
+### Component Documentation
+- **[Contracts Documentation](contracts/README.md)** - Smart contract deployment, API reference, and usage
+- **[Frontend Documentation](frontend/README.md)** - Web application setup, features, and troubleshooting
+- **[Subnet Manager Guide](subnet/README-SUBNET-MANAGER.md)** - Comprehensive subnet management reference
+- **[Quick Reference](subnet/QUICK-REFERENCE.md)** - Essential commands and shortcuts
+
+### Integration Guides
+- **[MetaMask Integration](frontend/METAMASK_INTEGRATION.md)** - Wallet connection and network setup
+- **[Network Detection](frontend/NETWORK_DETECTION.md)** - Automatic network detection and switching
+
+### Security & Best Practices
+- **[Security Guidelines](SECURITY.md)** - Protecting sensitive data and private keys
+
+## 🔐 Security Considerations
+
+### For Deployment
+⚠️ Use HTTPS in production (configure reverse proxy)  
+⚠️ Set appropriate CORS policies on RPC endpoints  
+⚠️ Implement rate limiting on backend/RPC  
+⚠️ Keep Docker images and dependencies updated  
+⚠️ Use environment variables for sensitive configuration  
+⚠️ Enable audit logging for manager operations  
+
+### For Users
+✅ Always review transactions in MetaMask before approving  
+✅ Verify contract addresses before connecting  
+✅ Keep MetaMask seed phrase secure and private  
+✅ Only connect to trusted RPC endpoints  
+❌ Never share private keys or seed phrases  
+❌ Never commit sensitive data to repositories  
+
+## 🐛 Troubleshooting
+
+### Subnet Issues
+
+**Nodes not responding after start:**
+```bash
+# Wait 40 seconds for initialization, then:
+./subnet-manager.sh status
+```
+
+**No blocks being mined:**
+```bash
+# Check peer connections
+./subnet-manager.sh peers
+# Should show 2 peers per node
+
+# View logs for errors
+./subnet-manager.sh logs subnet1
+```
+
+**Port conflicts:**
+```bash
+# Check what's using the ports
+lsof -i :8545
+lsof -i :8546
+lsof -i :8547
+```
+
+### Contract Issues
+
+**ESM/TypeScript errors in Docker:**
+```bash
+cd contracts
+./run.sh
+# Select option 7: Deep clean & rebuild
+```
+
+**Deployment fails:**
+```bash
+# Verify subnet is running
+cd ../subnet
+./subnet-manager.sh status
+
+# Check RPC connectivity
+curl http://localhost:8545 -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
+```
+
+### Frontend Issues
+
+**MetaMask not detected:**
+- Install MetaMask extension
+- Refresh page after installation
+- Check browser console for errors
+
+**Wrong network detected:**
+- Click "Switch to XDC Subnet" in app
+- Or manually switch in MetaMask
+- Use "Add XDC Subnet Network" if needed
+
+**Connection fails:**
+```bash
+# Verify RPC URL in .env
+cat frontend/.env | grep VITE_DEFAULT_RPC_URL
+
+# Test RPC endpoint
+curl http://localhost:8545 -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
+```
 
 ## 🤝 Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+We welcome contributions! Please see our contributing guidelines:
 
-## 🔐 Security
-
-For security-related information, please read [SECURITY.md](SECURITY.md).
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+For issues and questions:
+- Check the troubleshooting sections in component READMEs
+- Review the [Security Guidelines](SECURITY.md)
+- Check Docker and Node.js versions match prerequisites
+- Consult browser console for frontend errors
+- Review Docker logs for backend issues
+
+## 🎯 What's Next?
+
+After getting XDC SubnetFoundry running:
+1. **Customize**: Modify genesis block, add more validators
+2. **Extend**: Add custom smart contracts for your use case
+3. **Scale**: Deploy to cloud infrastructure (AWS, Azure, GCP)
+4. **Monitor**: Integrate with existing monitoring tools
+5. **Secure**: Implement additional security measures for production
+
+---
+
+**XDC SubnetFoundry** - Build Your Enterprise Network with XDC Subnet

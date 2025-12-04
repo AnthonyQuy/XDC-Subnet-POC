@@ -33,13 +33,11 @@ function App() {
     transferOwnership,
   } = useContract();
 
-  // Debug panel visibility state with localStorage persistence
   const [showDebugPanel, setShowDebugPanel] = useState(() => {
     const saved = localStorage.getItem('showDebugPanel');
-    return saved !== 'false'; // Default to true
+    return saved !== 'false';
   });
 
-  // Persist debug panel preference
   useEffect(() => {
     localStorage.setItem('showDebugPanel', String(showDebugPanel));
   }, [showDebugPanel]);

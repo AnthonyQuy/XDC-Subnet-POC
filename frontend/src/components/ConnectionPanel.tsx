@@ -14,7 +14,6 @@ interface NetworkInfo {
   chainName: string;
 }
 
-// Read expected network configuration from environment variables
 const EXPECTED_CHAIN_ID = import.meta.env.VITE_SUBNET_CHAIN_ID || '57539';
 const EXPECTED_NETWORK_NAME = 'XDC Subnet';
 const EXPECTED_RPC_URL = import.meta.env.VITE_DEFAULT_RPC_URL || 'http://127.0.0.1:8545';

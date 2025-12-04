@@ -28,13 +28,11 @@ const ManageContract: React.FC<ManageContractProps> = ({ currentManager, onTrans
     
     setValidated(true);
     
-    // Check if address is valid Ethereum address
     if (!newManager.match(/^0x[a-fA-F0-9]{40}$/)) {
       toast.error('Please enter a valid Ethereum address (0x followed by 40 hex characters)');
       return;
     }
     
-    // Confirm with the user before transferring manager role
     if (window.confirm(`Are you sure you want to transfer the manager role to ${newManager}? This action cannot be undone.`)) {
       onTransferManager(newManager);
       setNewManager('');

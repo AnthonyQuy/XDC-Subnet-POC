@@ -85,7 +85,6 @@ const UpdateMemberForm: React.FC<UpdateMemberFormProps> = ({ onUpdateMember, mem
     
     setValidated(true);
     
-    // Perform comprehensive validation
     const validation = validateMemberData({
       address: formData.address,
       x500Name: formData.x500Name,

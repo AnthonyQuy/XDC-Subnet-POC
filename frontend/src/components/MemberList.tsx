@@ -13,7 +13,6 @@ const MemberList: React.FC<MemberListProps> = ({ members, onSelectMember, loadin
   const [filteredMembers, setFilteredMembers] = useState<string[]>([]);
   const [memberStatus, setMemberStatus] = useState<Record<string, boolean>>({});
 
-  // Filter members based on search term
   useEffect(() => {
     if (!members) return;
 
@@ -23,7 +22,6 @@ const MemberList: React.FC<MemberListProps> = ({ members, onSelectMember, loadin
     setFilteredMembers(filtered);
   }, [members, searchTerm]);
 
-  // Fetch status for each member
   useEffect(() => {
     const fetchMemberStatus = async () => {
       if (!members || members.length === 0) return;
@@ -31,10 +29,8 @@ const MemberList: React.FC<MemberListProps> = ({ members, onSelectMember, loadin
       const statusObj: Record<string, boolean> = {};
       for (const address of members) {
         try {
-          // First check if member exists to avoid unnecessary RPC errors
           const exists = await contractService.isMember(address);
           if (!exists) {
-            console.warn(`Member ${address} not found in contract`);
             statusObj[address] = false;
             continue;
           }
@@ -42,7 +38,6 @@ const MemberList: React.FC<MemberListProps> = ({ members, onSelectMember, loadin
           const member = await contractService.getMember(address);
           statusObj[address] = member.isActive;
         } catch (error) {
-          console.error(`Error fetching status for ${address}:`, error);
           statusObj[address] = false;
         }
       }

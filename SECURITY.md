@@ -8,42 +8,39 @@ This project requires various private keys, API keys, and contract addresses to 
 
 ### Configuration Files Setup
 
-1. **Environment Files**
+1. **Contracts Environment File**
 
-   Copy the example files and fill in your actual values:
+   Copy the example file and fill in your actual values:
 
    ```bash
    # For contract deployment
-   cp generated/contract_deploy.env.example generated/contract_deploy.env
-   
-   # For frontend configuration
-   cp generated/subswap-frontend.config.json.example generated/subswap-frontend.config.json
+   cd contracts
+   cp ".env example" .env
    ```
 
-2. **Private Keys**
+2. **Frontend Environment File**
+
+   Copy the example file and fill in your actual values:
+
+   ```bash
+   # For frontend configuration
+   cd frontend
+   cp .env.example .env
+   ```
+
+3. **Private Keys**
 
    Edit the environment files and add your actual private keys:
 
    ```
-   # In generated/contract_deploy.env
+   # In contracts/.env
    PARENTNET_PK=your_actual_parentnet_private_key
    SUBNET_PK=your_actual_subnet_private_key
    ```
 
-3. **Contract Addresses**
+4. **Contract Addresses**
 
-   After deploying contracts, update the addresses in both configuration files:
-
-   ```
-   # In generated/contract_deploy.env
-   CHECKPOINT_CONTRACT=0x...
-   REVERSE_CHECKPOINT_CONTRACT=0x...
-   ...
-
-   # In generated/subswap-frontend.config.json
-   "parentnetApp": "0x...",
-   "subnetApp": "0x...",
-   ```
+   After deploying contracts, update the addresses in the configuration files as needed.
 
 ### Security Best Practices
 
@@ -111,6 +108,10 @@ If you accidentally committed sensitive data, follow these steps to remove it:
 
 ## Reporting Security Issues
 
-If you discover a security vulnerability in this project, please report it by [INSERT PREFERRED REPORTING METHOD].
+If you discover a security vulnerability in this project, please report it by opening a GitHub Security Advisory at:
 
-Do NOT report security vulnerabilities through public GitHub issues.
+https://github.com/AnthonyQuy/XDC-Subnet-POC/security/advisories
+
+Alternatively, you can email the repository maintainers directly (check repository for contact information).
+
+**Do NOT report security vulnerabilities through public GitHub issues.**
