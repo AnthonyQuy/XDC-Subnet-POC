@@ -99,6 +99,200 @@ A complete XDC subnet with:
 - Docker Compose orchestration
 - Bash management scripts
 
+## 🔄 Understanding the Separation: NetworkManager vs Subnet Control
+
+**A Critical Distinction for Enterprise Deployments**
+
+XDC SubnetFoundry separates infrastructure control from application governance. Understanding this separation is crucial for proper deployment and usage.
+
+### Two Layers, Two Purposes
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│         NetworkManager Contract (APPLICATION LAYER)          │
+│                  "WHO is authorized?"                        │
+│                                                              │
+│  ✓ Member registry and identity                             │
+│  ✓ X.500 distinguished names                                │
+│  ✓ Public keys and network info                             │
+│  ✓ Active/inactive status                                   │
+│  ✓ Governance and authorization                             │
+│                                                              │
+│  Controlled by: Smart contract transactions                 │
+│  Changed via: Frontend UI or contract calls                 │
+└──────────────────────┬───────────────────────────────────────┘
+                       │ Deployed on
+                       ↓
+┌─────────────────────────────────────────────────────────────┐
+│          Subnet Control (INFRASTRUCTURE LAYER)               │
+│                 "HOW does it operate?"                       │
+│                                                              │
+│  ✓ Block production and validation                          │
+│  ✓ Consensus mechanism (XDPoS)                              │
+│  ✓ Transaction processing                                   │
+│  ✓ Peer discovery and connections                           │
+│  ✓ Network health and monitoring                            │
+│                                                              │
+│  Controlled by: Docker containers & CLI scripts             │
+│  Changed via: Configuration files & node management         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Detailed Comparison
+
+| Aspect | NetworkManager Contract | Subnet Control |
+|--------|------------------------|----------------|
+| **Purpose** | Member registry & governance | Block production & consensus |
+| **Technology** | Smart Contract (Solidity) | Blockchain Nodes (XDC/Go) |
+| **Layer** | Application (Tier 2) | Infrastructure (Tier 3) |
+| **Scope** | WHO can be a member | HOW the network operates |
+| **Control** | Contract owner (via transactions) | Infrastructure admin (via Docker/CLI) |
+| **Data** | Member identities, X.500 names, keys | Blockchain state, blocks, transactions |
+| **Changes** | On-chain transactions | Configuration & node restarts |
+| **Access** | Anyone can read, owner can write | Shell/Docker access required |
+| **Visibility** | Transparent, auditable on-chain | Logs, node status, metrics |
+
+### What NetworkManager Controls ✅
+
+**Member Registry:**
+```javascript
+// Add a member to the on-chain registry
+contract.methods.addMember(
+  "0x123...",                    // Member address
+  "CN=Node1,O=Corp,C=US",       // X.500 Name
+  "0xPublicKey...",             // Public Key
+  12345,                         // Serial number
+  1,                             // Platform version
+  "192.168.1.100",              // Host
+  30303                          // Port
+).send();
+
+// This ONLY adds to the contract registry
+// Does NOT make them a validator
+```
+
+**Operations:**
+- ✅ Register authorized members
+- ✅ Store identity information
+- ✅ Track member status (active/inactive)
+- ✅ Maintain network configuration details
+- ✅ Provide governance interface
+- ✅ Emit events for audit trails
+
+**Does NOT Control:**
+- ❌ Actual validator participation
+- ❌ Block production
+- ❌ Consensus decisions
+- ❌ Peer connections
+- ❌ Node infrastructure
+
+### What Subnet Control Controls ✅
+
+**Infrastructure Operations:**
+```bash
+# Start the validators
+./subnet-manager.sh start
+
+# Check consensus status
+./subnet-manager.sh status
+
+# View peer connections
+./subnet-manager.sh peers
+
+# These control ACTUAL BLOCKCHAIN INFRASTRUCTURE
+```
+
+**Operations:**
+- ✅ Start/stop validator nodes
+- ✅ Manage consensus participation
+- ✅ Process transactions
+- ✅ Maintain peer connections
+- ✅ Monitor network health
+- ✅ Configure genesis block
+
+**Does NOT Control:**
+- ❌ Member registry data
+- ❌ Application-level authorization
+- ❌ Business logic about membership
+- ❌ Governance workflows
+
+### Real-World Analogy
+
+Think of a corporate office building:
+
+**Subnet Control** = The Building Infrastructure
+- Physical structure and operations
+- Power, HVAC, networking, security
+- Core facilities management
+- Building access control
+
+**NetworkManager Contract** = The Employee Directory
+- Who works here (member list)
+- Contact information (X.500 names, keys)
+- Department assignments (network info)
+- Access badges (authorization data)
+
+The employee directory runs INSIDE the building but doesn't control the building's power or elevator operations. Similarly, NetworkManager runs ON the subnet but doesn't control consensus or block production.
+
+### How They Work Together
+
+```
+EXAMPLE: Adding a New Network Member
+
+1. INFRASTRUCTURE (Must be running first):
+   └─> Validators producing blocks
+   └─> Network accepting transactions
+   └─> RPC endpoints available
+
+2. CONTRACT DEPLOYMENT:
+   └─> NetworkManager deployed on chain
+   └─> Contract address available
+   └─> Ready to store member data
+
+3. MEMBER REGISTRATION (via Contract):
+   └─> Frontend submits transaction
+   └─> Transaction processed by validators
+   └─> Member data stored in contract
+   └─> Event emitted for logging
+
+4. MEMBER USAGE:
+   └─> Applications query contract
+   └─> Check if member authorized
+   └─> Retrieve member details
+   └─> Use for application logic
+```
+
+### Important Notes
+
+⚠️ **The NetworkManager contract does NOT:**
+- Make nodes become validators
+- Control which nodes participate in consensus
+- Affect blockchain operation
+
+✅ **The NetworkManager contract DOES:**
+- Provide an application-layer registry
+- Enable governance workflows
+- Store identity information
+- Track authorized members
+
+The three validators in SubnetFoundry are configured at the infrastructure level (genesis.json, docker-compose.yml). The NetworkManager provides an APPLICATION-LAYER registry that applications can use to determine authorized members for their specific use cases.
+
+### Use Cases
+
+**Use NetworkManager for:**
+- Building a permissioned network directory
+- Tracking authorized participants
+- Implementing business logic around membership
+- Creating governance workflows
+- Auditing member changes over time
+
+**Use Subnet Control for:**
+- Starting/stopping the blockchain
+- Adding new validator nodes to consensus
+- Monitoring network health
+- Troubleshooting consensus issues
+- Managing infrastructure resources
+
 ## 📋 Features
 
 ### Blockchain Infrastructure
