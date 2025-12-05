@@ -11,13 +11,13 @@ interface NavigationProps {
   onToggleDebugPanel: () => void;
 }
 
-const Navigation: React.FC<NavigationProps> = ({ 
-  account, 
-  isConnected, 
-  isOwner, 
-  showDebugPanel, 
-  onLogout, 
-  onToggleDebugPanel 
+const Navigation: React.FC<NavigationProps> = ({
+  account,
+  isConnected,
+  isOwner,
+  showDebugPanel,
+  onLogout,
+  onToggleDebugPanel
 }) => {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -26,7 +26,18 @@ const Navigation: React.FC<NavigationProps> = ({
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
       <Container>
-        <Navbar.Brand href="#home">XDC Network Manager</Navbar.Brand>
+
+
+        <Navbar.Brand href="#home">
+          <img
+            src="/Logo.png"
+            alt="XDC Logo"
+            style={{
+              width: '40px',
+              height: '40px',
+              objectFit: 'contain'
+            }}
+          /></Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
           {isConnected && (
@@ -35,8 +46,8 @@ const Navigation: React.FC<NavigationProps> = ({
                 <Badge bg="success" className="me-2">Owner</Badge>
               )}
               <Nav.Item className="d-flex align-items-center text-light me-2">
-                <span 
-                  className="address-text" 
+                <span
+                  className="address-text"
                   style={{ cursor: 'pointer' }}
                   onClick={() => copyToClipboard(account)}
                   title="Click to copy"
@@ -52,18 +63,18 @@ const Navigation: React.FC<NavigationProps> = ({
                   </Tooltip>
                 }
               >
-                <Button 
+                <Button
                   variant={showDebugPanel ? 'outline-info' : 'outline-secondary'}
-                  size="sm" 
+                  size="sm"
                   onClick={onToggleDebugPanel}
                   className="me-2"
                 >
                   <i className={`bi bi-${showDebugPanel ? 'bug-fill' : 'bug'}`}></i>
                 </Button>
               </OverlayTrigger>
-              <Button 
-                variant="outline-light" 
-                size="sm" 
+              <Button
+                variant="outline-light"
+                size="sm"
                 onClick={onLogout}
               >
                 Disconnect

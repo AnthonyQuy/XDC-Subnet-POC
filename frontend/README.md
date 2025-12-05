@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="../Logo.png" alt="XDC SubnetFoundry Logo" width="200"/>
+</div>
+
 # XDC Network Manager Frontend
 
 A modern TypeScript + React + Vite web application for interacting with the NetworkManager contract on the XDC blockchain subnet. This application provides a comprehensive interface to manage network members, update their details, check their status, and transfer the manager role with built-in MetaMask integration and automatic network detection.
